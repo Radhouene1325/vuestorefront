@@ -1,0 +1,20 @@
+{
+  "name": "middleware-app",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "node middleware.js"
+  },
+  "dependencies": {
+    "@vue-storefront/magento-api": "^2.7.0",
+    "@vue-storefront/magento-sdk": "^4.0.0",
+    "@vue-storefront/middleware": "^3.10.1",
+    "@vue-storefront/sdk": "^3.4.1",
+    "consola": "^3.1.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "lerna": "^7.0.1"
+  }
+}

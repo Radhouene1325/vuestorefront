@@ -1,0 +1,75 @@
+--turbopack
+
+
+
+import { GraphQLClient } from 'graphql-request';
+
+const client = new GraphQLClient('https://your-magento-instance/graphql', {
+    headers: {
+        Authorization: `Bearer YOUR_MAGENTO_ACCESS_TOKEN`,
+    },
+});
+
+export default async function handler(req, res) {
+    const mutation = `#graphql
+        mutation country($id: String!) {
+            country(id: $id) {
+                available_regions {
+                    code
+                    id
+                    name
+                }
+                full_name_english
+                full_name_locale
+                id
+                three_letter_abbreviation
+                two_letter_abbreviation
+            }
+        }
+    `;
+
+    const mutationVariables = {
+        id: 'IT', // Example: Italy
+    };
+
+    try {
+        const result = await client.request(mutation, mutationVariables);
+        console.log('Result:', result);
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+
+
+combine useSWRMutation
+
+
+import useSWRMutation from 'swr/mutation';
+
+const useCombinedMutations = () => {
+  const { trigger: setBillingAddress, isMutating: isSettingBillingAddress } = useSWRMutation(
+    `${BASEURL}/api/setBillingAddressOnCart/setBillingAddressOnCart`,
+    sendData
+  );
+
+  const { trigger: createCustomerAddress, isMutating: isCreatingCustomerAddress } = useSWRMutation(
+    `${BASEURL}/api/createCustomerAddress/createCustomerAddress`,
+    sendData
+  );
+
+  const trigger = async (data) => {
+    await setBillingAddress(data);
+    await createCustomerAddress(data);
+  };
+
+  const isMutating = isSettingBillingAddress || isCreatingCustomerAddress;
+
+  return { trigger, isMutating };
+};
+
+// Usage
+const { trigger, isMutating } = useCombinedMutations();
