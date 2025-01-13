@@ -1,11 +1,13 @@
-import React from 'react'
+import React, {useEffect, useMemo} from 'react'
 import Pannier from "@/components/panier/panier";
 import {GetServerSideProps} from "next";
 import {AppDispatch, RootState, wrapper} from "@/store";
 import fetchHomePage from "@/utils/fetchHomePage";
 import {parse} from "cookie";
 import Chekout from "@/components/chekout/chekout";
-import {string} from "postcss-selector-parser";
+import {useDispatch, useSelector} from "react-redux";
+import {cartProducts} from "@/store/slices/productsSlice";
+import {useAppSelector} from "@/store/lib/hooks";
 export interface Cart{
     items:any,
     prices:Price,
@@ -30,14 +32,22 @@ export interface Availablepayment {
     title:string,
     __typename:string,
 }
+
 const Prod = ({cart}) => {
 
     // console.log(customerCart)
-     console.log(cart)
+    console.log(cart)
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+
+        dispatch(cartProducts(cart));
+
+    }, []);
+
+
 // const {available_payment_methods}=customerCart.customerCart
 //     console.log(available_payment_methods)
-
-
 
 
     //  console.log(cart)
@@ -53,6 +63,10 @@ const Prod = ({cart}) => {
     // }: Price = prices
     // const {total_quantity, is_virtual, id, email, billing_address, applied_coupon}: Cart = cart
 
+    let index = useSelector((state: RootState) => state.product?.cartProducts);
+    console.log(index)
+
+
     return (
         <main>
 
@@ -62,7 +76,7 @@ const Prod = ({cart}) => {
                 <div className="flex flex-col md:flex-row gap-4">
 
                     <div className="flex-1 min-w-[300px]">
-                        {cart?.items?.map((item: any, index: number) => {
+                        {index?.items?.map((item: any, index: number) => {
                             return <Pannier item={item} key={index}/>
 
                         })}
@@ -72,13 +86,13 @@ const Prod = ({cart}) => {
                     <div className="flex-shrink-0 w-full md:w-[400px]">
                         <Chekout
                             // available_payment_methods={available_payment_methods}
-                            prices={cart?.prices}
+                            prices={index?.prices}
                         />
                     </div>
                 </div>
             </div>
         </main>
-);
+    );
 };
 
 export default Prod;

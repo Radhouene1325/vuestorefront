@@ -175,7 +175,7 @@ console.log(deleteItem)
                         Quantity: <span className="font-semibold">{quantity}</span>
                     </p>
 
-                    <QuantitySelector product={product}  setDeleteItem={setDeleteItem} deleteItem={deleteItem}/>
+                    <QuantitySelector product={product} item={item}  setDeleteItem={setDeleteItem} deleteItem={deleteItem}/>
 
 
                     <p className="text-neutral-900 mt-2">

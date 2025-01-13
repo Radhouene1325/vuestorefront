@@ -159,7 +159,8 @@ export default function ProductsChekout({ item }: { item: any }) {
     }
 
     return (
-        <div className="relative flex flex-col border-b border-neutral-200 hover:shadow-lg min-w-[320px] max-w-[640px] p-4">
+        <div
+            className="relative flex flex-col border-b border-neutral-200 hover:shadow-lg min-w-[320px] max-w-[640px] p-4">
             {/* TOP SECTION: Variant Info */}
             <div className="flex">
                 {/* Main Variant Image */}
@@ -174,8 +175,9 @@ export default function ProductsChekout({ item }: { item: any }) {
                         />
                     </SfLink>
                     {/* Example "Sale" badge */}
-                    <div className="absolute top-0 left-0 text-white bg-secondary-600 py-1 pl-1.5 pr-2 text-xs font-medium">
-                        <SfIconSell size="xs" className="mr-1" />
+                    <div
+                        className="absolute top-0 left-0 text-white bg-secondary-600 py-1 pl-1.5 pr-2 text-xs font-medium">
+                        <SfIconSell size="xs" className="mr-1"/>
                         Sale
                     </div>
                 </div>
@@ -227,7 +229,7 @@ export default function ProductsChekout({ item }: { item: any }) {
                                     aria-label="Decrease value"
                                     onClick={() => dec()}
                                 >
-                                    <SfIconRemove />
+                                    <SfIconRemove/>
                                 </SfButton>
                                 <input
                                     id={inputId}
@@ -253,7 +255,7 @@ export default function ProductsChekout({ item }: { item: any }) {
                                     aria-label="Increase value"
                                     onClick={() => inc()}
                                 >
-                                    <SfIconAdd />
+                                    <SfIconAdd/>
                                 </SfButton>
                             </div>
 
@@ -263,9 +265,10 @@ export default function ProductsChekout({ item }: { item: any }) {
                                 type="button"
                                 className="text-neutral-500 text-xs font-light ml-auto flex items-center px-3 py-1.5"
                             >
-                                <SfIconDelete />
+                                <SfIconDelete/>
                                 <span className="hidden ml-1.5 sm:block">Remove</span>
                             </button>
+
                         </div>
                     </div>
                 </div>
@@ -277,17 +280,17 @@ export default function ProductsChekout({ item }: { item: any }) {
 
 
                     <div className="flex gap-2 mt-2 overflow-x-auto max-w-[240px]">
-                         {/*{extraImages.map((img, idx) => (*/}
+                        {/*{extraImages.map((img, idx) => (*/}
                         <img
-                        //                     // key={idx}
-                                            src={item?.product?.thumbnail.url}
-                        //                     // alt={`Variant image ${idx + 1}`}
-                                            className="w-12 h-12 border border-neutral-200 rounded-md flex-shrink-0"
-                                         />
-                                         {/*// ))}*/}
-                                    </div>
+                            //                     // key={idx}
+                            src={item?.product?.thumbnail.url}
+                            //                     // alt={`Variant image ${idx + 1}`}
+                            className="w-12 h-12 border border-neutral-200 rounded-md flex-shrink-0"
+                        />
+                        {/*// ))}*/}
+                    </div>
 
-                        <p className="text-sm font-semibold mb-2"> Informations du produit original</p>
+                    <p className="text-sm font-semibold mb-2"> Informations du produit original</p>
                     {/* For example, show the product name, SKU, weight, etc. */}
                     <p className="text-xs mb-1">
                         <span className="font-medium">Nom: </span>
@@ -305,6 +308,7 @@ export default function ProductsChekout({ item }: { item: any }) {
             )}
         </div>
     );
+
 }
 
 

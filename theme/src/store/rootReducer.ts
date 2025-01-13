@@ -2,13 +2,13 @@ import { combineReducers, AnyAction } from '@reduxjs/toolkit';
 import { HYDRATE } from 'next-redux-wrapper';
 import counterReducer,{CounterState} from "@/store/slices/counterSlice";
 import userReducer,{UserState} from "@/store/slices/userSlice";
-
+import productsReducer,{ProductsState} from "@/store/slices/productsSlice";
 import categorieReducer,{categorieSate} from "@/store/slices/categorieSlice"
 import {persistReducer, REHYDRATE} from "redux-persist";
  // import storage from "redux-persist/lib/storage";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 
-import wichlistReducer,{WichListSlice} from "@/store/slices/wichlistSlice";
+import wichlistReducer,{WichListState} from "@/store/slices/wichlistSlice";
 
 
 
@@ -19,6 +19,7 @@ export const combinedReducer = combineReducers({
     user:userReducer,
     categorie:categorieReducer,
     wichList:wichlistReducer,
+    product:productsReducer,
 });
 
 // For TypeScript, define a type that matches your state shape
@@ -26,7 +27,8 @@ export interface RootState {
     counter: CounterState;
     user:UserState,
     categorie:categorieSate,
-    wichList:WichListSlice,
+    wichList:WichListState,
+    product:ProductsState,
 }
 
 
@@ -79,7 +81,11 @@ console.log('action.payload')
             wichList:{
                 ...state?.wichList,
                 ...action.payload?.wichList,
-            }
+            },
+            product:{
+                ...state?.product,
+                ...action.payload?.product,
+            },
         };
     }
 console.log('action.type second')
@@ -90,7 +96,7 @@ console.log('action.type second')
 // Configure redux-persist on the root reducer
 const persistConfig = {
     key: 'root',
-    whitelist: ['categorie', 'user','counter','wichList'], // slices you want to persist
+    whitelist: ['categorie', 'user','counter','wichList','product'], // slices you want to persist
     storage: storage,
 };
 

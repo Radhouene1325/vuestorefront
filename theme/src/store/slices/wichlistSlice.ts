@@ -17,22 +17,22 @@ export const wichListSlice = createSlice({
     name: 'wichList',
     initialState,
     reducers: {
-        wichListProductsLength: (state,action:PayloadAction) => {
+        wichListProductsLength: (state: { wichListLength: any; },action:PayloadAction) => {
             console.log(action.payload)
             state.wichListLength=action.payload;
         },
-        wichListProducts:(state,action:PayloadAction) => {
+        wichListProducts:(state: { productsWichList: any; },action:PayloadAction) => {
             state.productsWichList=action.payload;
         },
         // incrementByAmount: (state, action: PayloadAction<number>) => {
         //     state.value += action.payload;
         // },
 
-        wichListDecrementLength:(state,action:PayloadAction) => {
+        wichListDecrementLength:(state: { wichListLength: number; },action:PayloadAction) => {
             state.wichListLength -=1;
         },
 
-        wichListDecrementProducts:(state,action:PayloadAction) => {
+        wichListDecrementProducts:(state: { productsWichList: any[]; },action:PayloadAction) => {
             state.productsWichList=state.productsWichList.filter((item:any)=>item.product.sku!==action.payload)
         },
 

@@ -18,6 +18,8 @@ export declare function removeItemFromCart(
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 let cartId=await getCookie('cart-id',{req, res});
 let token=await getCookie('auth-token',{req, res});
+
+console.log(cartId,token)
 console.log("skssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssu",req.body);
     const params = { cart_id: cartId, cart_item_uid: req.body }
 
@@ -33,7 +35,7 @@ console.log("sksssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss
             },
 
         );
-
+console.log("the response", response);
 
         res.status(200).json({data: response});
 
