@@ -82,10 +82,18 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { sdk } from '../../../../sdk.config';
 import { getCookie } from 'cookies-next';
 import { serialize } from 'cookie';
-import { AddProductsToCartResponse } from '@vue-storefront/magento-sdk';
-import { AddProductsToCartMutationVariables } from '@vue-storefront/magento-types';
+import {AddProductsToCartMutation, AddProductsToCartResponse} from '@vue-storefront/magento-sdk';
+import {AddProductsToCartInput, AddProductsToCartMutationVariables, CustomHeaders} from '@vue-storefront/magento-types';
 import fetchHomePage from "@/utils/fetchHomePage";
-
+import {Context} from "@vue-storefront/magento-api/server/types/context";
+import {CustomQuery} from "@vue-storefront/middleware";
+import {FetchResult} from "@apollo/client";
+export declare function addProductsToCart(
+    context: Context,
+    input: AddProductsToCartInput,
+    customQuery?: CustomQuery,
+    customHeaders?: CustomHeaders
+): Promise<FetchResult<AddProductsToCartMutation>>;
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         console.log('Received Request Body:', req.body);
@@ -108,14 +116,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // Attempt to add products to the cart
-        const response = await sdk.magento.addProductsToCart<AddProductsToCartResponse>(
+        const response = await sdk.magento.addProductsToCart<AddProductsToCartMutation>(
             {
                 cartId: cartId as string,
                 cartItems: [
                     {
                         sku: sku as string,
                         quantity: value as number,
-                        selected_options: [paramsColor as string, params as string],
+                        selected_options: [paramsColor?paramsColor as string:null , params?params as string :null ],
                     },
                 ],
             },

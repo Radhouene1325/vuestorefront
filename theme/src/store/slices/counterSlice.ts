@@ -1,5 +1,6 @@
 // store/slices/counterSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {HYDRATE} from "next-redux-wrapper";
 // export interface AddressCustomer {
 //     id: number;              // Example: Unique identifier for the address
 //     street: string;          // Example: Street name of the address
@@ -33,13 +34,28 @@ export const counterSlice = createSlice({
 
             state.adressescustomer = action.payload;
         },
-        deleteAdresseCustomer: (state, action: PayloadAction) => {
+        deleteAdresseCustomer: (state, action: PayloadAction<number>) => {
             console.log('hello address customer in in slice ', action.payload)
             console.log('hello address customer in in slice ', state.adressescustomer)
-            state.adressescustomer=state.adressescustomer?.addresses?.filter((item:any)=>item.id!==action.payload)
+            console.log('hello address customer in in slice ', action.payload)
+            const data=state.adressescustomer.addresses.findIndex((item:any)=>item.id===action.payload)
+            console.log('hello address customer in in slice ', data)
+            if(data!==-1){
+                state.adressescustomer.addresses.splice(data,1)
+            }
 
 
-            // return state.adressescustomer?.addresses?.addresses.filter((item: any) => item.id !== action.payload);
+
+        },
+
+        pushAdresseCustomer: (state, action: PayloadAction) => {
+            console.log('hello address customer in in slice ', action.payload.id)
+            const data=state.adressescustomer.addresses.findIndex((item:any)=>item.id===action.payload.id)
+            console.log('hello address customer in in slice ', data)
+            if(data===-1){
+                // state.adressescustomer=  state.adressescustomer.push(action.payload)
+                 state.adressescustomer.addresses=[action.payload,...state.adressescustomer.addresses]
+            }
 
         }
 
@@ -48,8 +64,17 @@ export const counterSlice = createSlice({
         //     state.value += action.payload;
         // },
     },
+    extraReducers: (builder) => {
+        builder.addCase(HYDRATE, (state, action) => {
+            // Assuming the reducer key in your store is "categorie":
+            return {
+                ...state,
+                ...action.payload.counter,
+            };
+        });
+    },
 
 });
 
-export const { openWichList, incrementByAmount,adressescustomer,deleteAdresseCustomer } = counterSlice.actions;
+export const { openWichList, incrementByAmount,adressescustomer,deleteAdresseCustomer,pushAdresseCustomer } = counterSlice.actions;
 export default counterSlice.reducer;

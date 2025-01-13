@@ -19,7 +19,11 @@ import {authntication, quantityCart, usernamecustomer} from "@/store/slices/user
 import {setHeaderCategories} from "@/store/slices/categorieSlice";
 import {sdk} from "../../sdk.config";
 
-import {queryIdRegion, queryProductsAndIdwichList} from "../../customQueryMagento/queryProductsWichList";
+import {
+    queryIdRegion,
+    queryOrderHistory,
+    queryProductsAndIdwichList, test
+} from "../../customQueryMagento/queryProductsWichList";
 import {wichListProducts, wichListProductsLength} from '@/store/slices/wichlistSlice';
 
 
@@ -266,6 +270,18 @@ console.log('111111111  premier partie de la condition',cartId);
 
     }
 
+
+
+    const customQueryResult = await sdk.magento.customQuery({query:test}, {
+
+        customHeaders: {
+            Authorization: `Bearer ${token || ''}`,
+
+        },
+
+
+    });
+    console.log('CCCCCCCCCCCCCCCCCCCCCSSSSScccccccSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', customQueryResult?.data?.customerOrders?.items)
 
     // console.log('her is the cusimer adress is oky ', result);
     // const customQuery = {

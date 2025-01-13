@@ -1,6 +1,6 @@
 import {SfButton, SfIconAdd, SfIconDelete, SfIconRemove} from '@storefront-ui/react';
 import {useCounter} from 'react-use';
-import {useId, ChangeEvent, useMemo} from 'react';
+import {useId, ChangeEvent, useMemo, useEffect} from 'react';
 import {clamp} from '@storefront-ui/shared';
 import useSWRMutation from "swr/mutation";
 import fetchHomePage from "@/utils/fetchHomePage";
@@ -44,9 +44,14 @@ const dispatch = useDispatch();
         const nextValue = parseFloat(currentValue);
         set(clamp(nextValue, min, max));
     }
-
+console.log(value)
     const {trigger, data, error, isMutating} = useSWRMutation(
         `${BASEURL}/api/removeItemFromCart/removeItemFromCart`,
+        fetchHomePage.removeItemFromCart
+    )
+
+    const {trigger: trigger2, data: data2, error: error2, isMutating: isMutating2} = useSWRMutation(
+        `${BASEURL}/api/updateCartItems/updateCartItems`,
         fetchHomePage.removeItemFromCart
     )
 
@@ -67,10 +72,27 @@ const dispatch = useDispatch();
             dispatch(quantityCart(data?.data?.data?.removeItemFromCart?.cart.total_quantity))
 
         }
-    }, [data]);
+        if (data2?.data?.data?.updateCartItems?.cart) {
+
+            dispatch(cartProducts(data2?.data?.data?.updateCartItems?.cart));
+            dispatch(quantityCart(data2?.data?.data?.updateCartItems?.cart.total_quantity))
+        }
+    }, [data,data2]);
+
+    useMemo(async () => {
+        if (value) {
+
+
+            const idItem = item?.uid
+
+
+            await trigger2({value, idItem});
+        }
+
+    }, [value]);
     // console.log(cartProducts(data?.data?.data?.removeItemFromCart?.cart);
 
-    console.log(data)
+    // console.log(data2.data.data.updateCartItems.cart)
     return (
         <div className="flex items-center justify-between mt-4 sm:mt-0">
             {/* Quantity Selector */}

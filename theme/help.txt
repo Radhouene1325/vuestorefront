@@ -73,3 +73,10 @@ const useCombinedMutations = () => {
 
 // Usage
 const { trigger, isMutating } = useCombinedMutations();
+
+
+
+
+git add .
+git commit -m "modify my file "
+git push origin main

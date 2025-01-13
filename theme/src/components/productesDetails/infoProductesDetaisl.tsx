@@ -130,7 +130,7 @@ console.log(description)
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await trigger({ sku:sku,paramsColor:paramsColor[0].uidColor,params:params[0].uidSize,value:value }); // POST { name, email } to /api/send-data
+            await trigger({ sku:sku,paramsColor:paramsColor[0]?.uidColor,params:params[0]?.uidSize,value:value }); // POST { name, email } to /api/send-data
         } catch (err) {
             console.error('Error sending data:', err);
         }
@@ -158,12 +158,13 @@ console.log(description)
         }
         handelItemIncartVarient()
     },[data])
-
+console.log(items.items.some(e => e?.configurable_options))
 
     return (
         <section className="md:max-w-[640px]">
-            <div className="inline-flex items-center justify-center text-sm font-medium text-white bg-secondary-600 py-1.5 px-3 mb-4">
-                <SfIconSell size="sm" className="mr-1.5" />
+            <div
+                className="inline-flex items-center justify-center text-sm font-medium text-white bg-secondary-600 py-1.5 px-3 mb-4">
+                <SfIconSell size="sm" className="mr-1.5"/>
                 Sale
             </div>
             <h1 className="mb-1 font-bold typography-headline-4">
@@ -171,7 +172,7 @@ console.log(description)
             </h1>
             <strong className="block font-bold typography-headline-3">${final_price.value}</strong>
             <div className="inline-flex items-center mt-4 mb-2">
-                <SfRating size="xs" value={3} max={5} />
+                <SfRating size="xs" value={3} max={5}/>
                 <SfCounter className="ml-1" size="xs">
                     123
                 </SfCounter>
@@ -181,21 +182,26 @@ console.log(description)
             </div>
             <ul className="mb-4 font-normal typography-text-sm">
 
-                <li dangerouslySetInnerHTML={{__html: description.html}} ></li>
-                <ColorFilter
-                    colorList={colorList} setColorList={setColorList}
-                    configurable_options={configurable_options}
-                    opened={opened} setOpened={setOpened} setParamsColor={setParamsColor} paramsColor={paramsColor}
-                />
-                <SizeFilter
+                <li dangerouslySetInnerHTML={{__html: description.html}}></li>
+                {items.items.some(e => e?.configurable_options) ? (<>
+                        <ColorFilter
+                            colorList={colorList} setColorList={setColorList}
+                            configurable_options={configurable_options}
+                            opened={opened} setOpened={setOpened} setParamsColor={setParamsColor} paramsColor={paramsColor}
+                        />)
+                    < SizeFilter
                     configurable_options={configurable_options}
                     selectedSizes={selectedSizes} setSelectedSizes={setSelectedSizes}
                     opened={opened} setOpened={setOpened} params={params} setParams={setParams}
-                />
+                    />
+                    </>):null
+                }
+
             </ul>
             <div className="py-4 mb-4 border-gray-200 border-y">
-                <div className="bg-primary-100 text-primary-700 flex justify-center gap-1.5 py-1.5 typography-text-sm items-center mb-4 rounded-md">
-                    <SfIconShoppingCartCheckout />{quantityLengthVarient as number} in cart
+                <div
+                    className="bg-primary-100 text-primary-700 flex justify-center gap-1.5 py-1.5 typography-text-sm items-center mb-4 rounded-md">
+                    <SfIconShoppingCartCheckout/>{quantityLengthVarient as number} in cart
                 </div>
                 <div className="items-start xs:flex">
                     <div className="flex flex-col items-stretch xs:items-center xs:inline-flex">
@@ -209,7 +215,7 @@ console.log(description)
                                 aria-label="Decrease value"
                                 onClick={() => dec()}
                             >
-                                <SfIconRemove />
+                                <SfIconRemove/>
                             </SfButton>
                             <input
                                 id={inputId}
@@ -230,30 +236,30 @@ console.log(description)
                                 aria-label="Increase value"
                                 onClick={() => inc()}
                             >
-                                <SfIconAdd />
+                                <SfIconAdd/>
                             </SfButton>
                         </div>
                         <p className="self-center mt-1 mb-4 text-xs text-neutral-500 xs:mb-0">
                             <strong className="text-neutral-900">{max}</strong> in stock
                         </p>
                     </div>
-                    <SfButton size="lg" className="w-full xs:ml-4" slotPrefix={<SfIconShoppingCart size="sm" />}
+                    <SfButton size="lg" className="w-full xs:ml-4" slotPrefix={<SfIconShoppingCart size="sm"/>}
                               onClick={handleSubmit}
                     >
                         Add to cart
                     </SfButton>
                 </div>
                 <div className="flex justify-center mt-4 gap-x-4">
-                    <SfButton size="sm" variant="tertiary" slotPrefix={<SfIconCompareArrows size="sm" />}>
+                    <SfButton size="sm" variant="tertiary" slotPrefix={<SfIconCompareArrows size="sm"/>}>
                         Compare
                     </SfButton>
-                    <SfButton size="sm" variant="tertiary" slotPrefix={<SfIconFavorite size="sm" />}>
+                    <SfButton size="sm" variant="tertiary" slotPrefix={<SfIconFavorite size="sm"/>}>
                         Add to list
                     </SfButton>
                 </div>
             </div>
             <div className="flex first:mt-4">
-                <SfIconPackage size="sm" className="flex-shrink-0 mr-1 text-neutral-500" />
+                <SfIconPackage size="sm" className="flex-shrink-0 mr-1 text-neutral-500"/>
                 <p className="text-sm">
                     Free shipping, arrives by Thu, Apr 7. Want it faster?
                     <SfLink href="#" variant="secondary" className="mx-1"
@@ -265,7 +271,7 @@ console.log(description)
                 </p>
             </div>
             <div className="flex mt-4">
-                <SfIconWarehouse size="sm" className="flex-shrink-0 mr-1 text-neutral-500" />
+                <SfIconWarehouse size="sm" className="flex-shrink-0 mr-1 text-neutral-500"/>
                 <p className="text-sm">
                     Pickup not available at your shop.
                     <SfLink href="#" variant="secondary" className="ml-1">
@@ -274,7 +280,7 @@ console.log(description)
                 </p>
             </div>
             <div className="flex mt-4">
-                <SfIconSafetyCheck size="sm" className="flex-shrink-0 mr-1 text-neutral-500" />
+                <SfIconSafetyCheck size="sm" className="flex-shrink-0 mr-1 text-neutral-500"/>
                 <p className="text-sm">
                     Free 30-days returns.
                     <SfLink href="#" variant="secondary" className="ml-1">

@@ -60,7 +60,7 @@ console.log(shippingMethode)
             sendData
         );
 
-        const trigger = async (data) => {
+        const trigger = async (data: any) => {
             await setBillingAddress(data);
             await createCustomerAddress(data);
         };
@@ -457,149 +457,7 @@ console.log(shippingMethode)
             </div>
 
 
-            {/*   //////////this normal designe */}
 
-            {/*    <div className="flex justify-center py-10 bg-neutral-100 min-h-screen">*/}
-            {/*        /!* Form wrapper *!/*/}
-            {/*        <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">*/}
-            {/*            <div className="mb-6">*/}
-            {/*                <h2 className="text-2xl font-bold mb-1">Billing Address</h2>*/}
-            {/*                <p className="text-sm text-neutral-600">*/}
-            {/*                    Please provide your billing details below.*/}
-            {/*                </p>*/}
-            {/*            </div>*/}
-
-            {/*            <form*/}
-            {/*                onSubmit={onSubmit}*/}
-            {/*                className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6 text-neutral-900"*/}
-            {/*            >*/}
-            {/*                /!* First Name *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*                    <span className="typography-text-sm font-medium">First Name</span>*/}
-            {/*                    <SfInput name="firstname" autoComplete="given-name" required/>*/}
-            {/*                </label>*/}
-
-            {/*                /!* Last Name *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*                    <span className="typography-text-sm font-medium">Last Name</span>*/}
-            {/*                    <SfInput name="lastname" autoComplete="family-name" required/>*/}
-            {/*                </label>*/}
-
-            {/*                /!* Phone *!/*/}
-            {/*                <label className="flex flex-col gap-1 col-span-full">*/}
-            {/*                    <span className="typography-text-sm font-medium">Phone</span>*/}
-            {/*                    <SfInput name="telephone" type="tel" autoComplete="tel" required/>*/}
-            {/*                </label>*/}
-
-            {/*                /!* Country *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*                    <span className="typography-text-sm font-medium">Country</span>*/}
-            {/*                    <SfSelect*/}
-            {/*                        name="country"*/}
-            {/*                        placeholder="-- Select --"*/}
-            {/*                        autoComplete="country-name"*/}
-            {/*                        required*/}
-            {/*                        onChange={handleSelect}*/}
-            {/*                    >*/}
-            {/*                        {countries.map((countryName) => (*/}
-            {/*                            <option key={countryName.id} value={countryName.id}>*/}
-            {/*                                {countryName.full_name_english}*/}
-            {/*                            </option>*/}
-            {/*                        ))}*/}
-            {/*                    </SfSelect>*/}
-            {/*                </label>*/}
-
-            {/*                /!* City *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*                    <span className="typography-text-sm font-medium">City</span>*/}
-            {/*                    <SfSelect*/}
-            {/*                        name="city"*/}
-            {/*                        placeholder="-- Select --"*/}
-            {/*                        autoComplete="address-level2"*/}
-            {/*                        required*/}
-            {/*                    >*/}
-            {/*                        {region?.data?.available_regions?.map((region) => (*/}
-            {/*                            <option key={region.id} value={region.id}>*/}
-            {/*                                {region.name}*/}
-            {/*                            </option>*/}
-            {/*                        ))}*/}
-            {/*                    </SfSelect>*/}
-            {/*                </label>*/}
-
-            {/*                /!* Street *!/*/}
-            {/*                <label className="flex flex-col gap-1 col-span-full">*/}
-            {/*                    <span className="typography-text-sm font-medium">Street</span>*/}
-            {/*                    <SfInput*/}
-            {/*                        name="street"*/}
-            {/*                        autoComplete="address-line1"*/}
-            {/*                        onBlur={validateStreet}*/}
-            {/*                        onChange={validateStreet}*/}
-            {/*                        required*/}
-            {/*                        invalid={!streetIsValid}*/}
-            {/*                    />*/}
-            {/*                    {!streetIsValid && (*/}
-            {/*                        <strong className="typography-error-sm text-negative-700 font-medium">*/}
-            {/*                            Please provide a valid street name*/}
-            {/*                        </strong>*/}
-            {/*                    )}*/}
-            {/*                    <small className="typography-hint-xs text-neutral-500 mt-1">*/}
-            {/*                        Street address or P.O. Box*/}
-            {/*                    </small>*/}
-            {/*                </label>*/}
-
-            {/*                /!* Apt Number *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*<span className="typography-text-sm font-medium">*/}
-            {/*  Apt#, Suite, etc*/}
-            {/*</span>*/}
-            {/*                    <SfInput name="aptNo"/>*/}
-            {/*                    <small className="typography-hint-xs text-neutral-500 mt-1">*/}
-            {/*                        Optional*/}
-            {/*                    </small>*/}
-            {/*                </label>*/}
-
-            {/*                /!* State *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*                    <span className="typography-text-sm font-medium">State</span>*/}
-            {/*                    <SfSelect*/}
-            {/*                        name="state"*/}
-            {/*                        placeholder="-- Select --"*/}
-            {/*                        autoComplete="address-level1"*/}
-            {/*                        required*/}
-            {/*                    >*/}
-            {/*                        {states.map((stateName) => (*/}
-            {/*                            <option key={stateName}>{stateName}</option>*/}
-            {/*                        ))}*/}
-            {/*                    </SfSelect>*/}
-            {/*                </label>*/}
-
-            {/*                /!* ZIP Code *!/*/}
-            {/*                <label className="flex flex-col gap-1">*/}
-            {/*                    <span className="typography-text-sm font-medium">ZIP Code</span>*/}
-            {/*                    <SfInput*/}
-            {/*                        name="zipCode"*/}
-            {/*                        placeholder="e.g., 12345"*/}
-            {/*                        autoComplete="postal-code"*/}
-            {/*                        required*/}
-            {/*                    />*/}
-            {/*                </label>*/}
-
-            {/*                /!* Use as Shipping Address *!/*/}
-            {/*                <label className="flex items-center gap-2 col-span-full">*/}
-            {/*                    <SfCheckbox name="useAsShippingAddress"/>*/}
-            {/*                    Use as shipping address*/}
-            {/*                </label>*/}
-
-            {/*                /!* Buttons *!/*/}
-            {/*                <div className="flex gap-4 col-span-full justify-end mt-2">*/}
-            {/*                    <SfButton type="reset" variant="secondary">*/}
-            {/*                        Clear All*/}
-            {/*                    </SfButton>*/}
-            {/*                    <SfButton type="submit">Save</SfButton>*/}
-            {/*                </div>*/}
-            {/*            </form>*/}
-            {/*        </div>*/}
-            {/*    </div>*/}
 
 
         </>

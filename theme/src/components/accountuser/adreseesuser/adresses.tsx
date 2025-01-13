@@ -7,9 +7,7 @@ import {
     SfIconShoppingCart,
     SfLink,
     SfListItem,
-    SfRating
-
-
+    SfRating, useDisclosure
 
 
 } from "@storefront-ui/react";
@@ -24,55 +22,65 @@ import {BASEURL} from "@/BASEURL/URL";
 import authenticationuser from "@/utils/authentication";
 import {deleteAdresseCustomer} from "@/store/slices/counterSlice";
 import {useDispatch} from "react-redux";
+import NewAdreses from "@/components/accountuser/adreseesuser/addnewadreses";
 
-const Adresses = ({   }) => {
-const adressCustomer=useSelector((state:RootState)=>state?.counter?.adressescustomer)
-    console.log(adressCustomer?.addresses)
-    let items=[1,2,3,4,5,6,7,8,9]
-    const [addressid,setAdressid]=React.useState<number>(0)
-const dispatch=useDispatch()
-    const { trigger, data, error, isMutating } = useSWRMutation(
+interface AdressesProps {
+    countries?: any
+}
+
+const Adresses = ({countries}) => {
+    const adressCustomer = useSelector((state: RootState) => state?.counter?.adressescustomer)
+    console.log(adressCustomer)
+    let items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    const [addressid, setAdressid] = React.useState<number>(0)
+    const dispatch = useDispatch()
+    const {trigger, data, error, isMutating} = useSWRMutation(
         `${BASEURL}/api/removeItemfromTowichList/removeItemfromTowichList`,
         authenticationuser.authentication
     )
 
     console.log(data?.data?.data?.deleteCustomerAddress)
-    const handelDelete = async (id:{id:number}) => {
+    const handelDelete = async (id: React.Key | null | undefined) => {
 
-    try {
-        await trigger(id);
-        setAdressid(id)
+        try {
+            await trigger(id);
+            setAdressid(id !== undefined && id !== null ? Number(id) : 0)
 
-        console.log('dddddddddddddddddddddddddd', id)
+            console.log('dddddddddddddddddddddddddd', id)
 
-        // return  adressCustomer.addresses.filter((item)=>item.id!==id)
-    }catch (e){
-        throw e
-    }finally {
-        console.log('hellossssssssssssss',id)
+            // return  adressCustomer.addresses.filter((item)=>item.id!==id)
+        } catch (e) {
+            throw e
+        } finally {
+            console.log('hellossssssssssssss', id)
+        }
+
     }
 
+    useMemo(async () => {
+        console.log(addressid)
+        if (data?.data?.data?.deleteCustomerAddress === true) {
+            await dispatch(deleteAdresseCustomer(addressid))
+        }
+
+    }, [data])
+//     const {isOpen, open, close} = useDisclosure({initialValue: true});
+// console.log(isOpen)
+    const [open,setOpen]=React.useState(false)
+    const handelOpen = () => {
+    setOpen(!open)
     }
-
-     useMemo(async() => {
-         if(data?.data?.data?.deleteCustomerAddress===true){
-             await dispatch(deleteAdresseCustomer(addressid))
-            }
-
-    }, [data?.data?.data?.deleteCustomerAddress])
-
-
     return (
         <>
 
             <div className="p-4">
-                <SfButton className="mb-4">
-                    Add New Address
+                <SfButton className="mb-4" onClick={handelOpen}>
+                    {open?'close' :'Add New Address'}
                 </SfButton>
 
                 {/* Storefront UI List */}
-
-                {adressCustomer?.addresses?.map((item) => (
+                <NewAdreses open={open}  countries={countries}/>
+                {!open&&adressCustomer?.addresses?.map((item: { id: React.Key | null | undefined; firstname: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; lastname: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; street: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; region: { region: any; }; country_code: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; telephone: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => (
                     <SfListItem
                         key={item.id}
                         className="mb-2 p-4 border border-neutral-200 rounded-md hover:shadow-lg transition-shadow"
@@ -110,9 +118,6 @@ const dispatch=useDispatch()
                 ))}
 
             </div>
-
-
-
 
 
         </>
@@ -168,7 +173,7 @@ const dispatch=useDispatch()
         //         ))}
         //     </div>
         // </div>
-    )
+    );
 }
 
 

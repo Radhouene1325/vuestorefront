@@ -10,20 +10,20 @@ import {adressescustomer} from "@/store/slices/counterSlice";
 import {useDispatch} from "react-redux";
 import fetchHomePage from "@/utils/fetchHomePage";
 import {useStore} from "react-redux";
-const Customer = ({addresses}) => {
+const Customer = ({addresses,data}) => {
 const dispatch=useDispatch()
     console.log('the addresses', addresses)
     dispatch(adressescustomer(addresses))
 
-    const store = useStore()?.__persistor?.getState()
-    ;
-console.log('the store', store)
+    const {countries}:{countries:any} = data
+
+
 
     return (
 
         <Layout>
 
-            <Adresses/>
+            <Adresses countries={countries} />
 
         </Layout>
     );
@@ -80,11 +80,13 @@ export const getServerSideProps = async (context) => {
     });
     console.log('the addresses', addresses)
     // store.dispatch(adressescustomer(addresses))
+    const {data: {data: data}} = await fetchHomePage.countries()
 
 
     return {
         props: {
-            addresses: addresses
+            addresses: addresses,
+            data
         }
     };
 }

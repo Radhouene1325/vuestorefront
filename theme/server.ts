@@ -10,8 +10,8 @@ const app = next({ dev });
 const handle = app.getRequestHandler();
 
 // Host & Port from environment or defaults
- const HOST ="lp06.corp.itroteam.com"
-// const HOST = "localhost";
+ //const HOST ="lp06.corp.itroteam.com"
+const HOST = "localhost";
 const PORT = parseInt(process.env.PORT || '0', 10) || 4000;
 
 app.prepare().then(() => {
