@@ -5,10 +5,20 @@ import Adresses from "@/components/accountuser/adreseesuser/adresses";
 import {AppDispatch, RootState, wrapper} from "@/store";
 import {GetServerSideProps, GetServerSidePropsContext} from "next";
 import {sdk} from "../../../../sdk.config";
+import {getCookie} from "cookies-next";
+import {adressescustomer} from "@/store/slices/counterSlice";
+import {useDispatch} from "react-redux";
+import fetchHomePage from "@/utils/fetchHomePage";
+import {useStore} from "react-redux";
+const Customer = ({addresses}) => {
+const dispatch=useDispatch()
+    console.log('the addresses', addresses)
+    dispatch(adressescustomer(addresses))
 
-const Customer = ({customer}) => {
+    const store = useStore()?.__persistor?.getState()
+    ;
+console.log('the store', store)
 
-    console.log('hekdsosdksdcjhdc', customer)
     return (
 
         <Layout>
@@ -39,21 +49,45 @@ const Customer = ({customer}) => {
 //
 //     let {req, res} = context;
 //     let token =await getCookie('auth-token', {req, res})
-//     console.log('tokenxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', token)
-//     const customer = await sdk.magento.customer({
+//     const {data: {customer: addresses}} = await sdk.magento.getCustomerAddresses({
 //         customHeaders: {
 //             Authorization: `Bearer ${token || ''}`,
 //         }
 //     });
-//     console.log('helllo admin im her', customer)
+//     console.log('the addresses', addresses)
+//     store.dispatch(adressescustomer(addresses))
 //
 //
 //     return {
 //         props: {
-//             customer: customer
+//             customer: 'hello'
 //         }
 //     };
 // });
-//
+
+
+
+
+
+
+export const getServerSideProps = async (context) => {
+    let {req, res} = context;
+    let token =await getCookie('auth-token', {req, res})
+    const {data: {customer: addresses}} = await sdk.magento.getCustomerAddresses({
+        customHeaders: {
+            Authorization: `Bearer ${token || ''}`,
+        }
+    });
+    console.log('the addresses', addresses)
+    // store.dispatch(adressescustomer(addresses))
+
+
+    return {
+        props: {
+            addresses: addresses
+        }
+    };
+}
+
 
 export default Customer;

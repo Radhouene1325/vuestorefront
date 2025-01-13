@@ -174,15 +174,18 @@
 
 // components/accountuser/userSidebar/sidebar.tsx
 
-import React, { Fragment } from 'react';
+import React, {Fragment, useMemo} from 'react';
 import Link from 'next/link';
 import {
     SfIconClose,
     SfIconChevronLeft,
     SfSelect,
     SfButton,
-} from '@storefront-ui/react'; // Import necessary Storefront UI components
-
+} from '@storefront-ui/react';
+import useSWRMutation from "swr/mutation";
+import {BASEURL} from "@/BASEURL/URL";
+import Authentication from "@/utils/authentication"; // Import necessary Storefront UI components
+import {useRouter} from "next/router";
 type SidebarProps = {
     isOpen: boolean;
     onClose: () => void;
@@ -194,10 +197,28 @@ const sortOptions = [
     { label: 'Sort by Relevance', value: 'relevance' },
 ];
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({isOpen, onClose}: SidebarProps) {
+    const router = useRouter()
     const handleClearFilters = () => {
         console.log('Filters cleared!');
     };
+
+    const {trigger, data, error, isMutating} = useSWRMutation(
+        `${BASEURL}/api/revokeCustomerToken/revokeCustomerToken`,
+        Authentication.authentication
+    );
+
+
+    const loggout = async () => {
+
+
+        await trigger({id:'hello'})
+    };
+    useMemo(async() => {
+        if (data) {
+          await   router.push('/')
+        }
+    }, [data]);
 
     const sidebarClasses = `
     fixed top-0 left-0 h-full bg-white shadow-lg z-50
@@ -218,7 +239,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     aria-label="Close sidebar"
                     onClick={onClose}
                 >
-                    <SfIconClose />
+                    <SfIconClose/>
                 </button>
             </div>
 
@@ -239,9 +260,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             {/* PERSONAL DETAILS */}
             <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">
                 <p className="mb-0 font-medium typography-headline-5">Personal Details</p>
-                <SfIconChevronLeft className="text-neutral-500" />
+                <SfIconChevronLeft className="text-neutral-500"/>
             </div>
-            <hr />
+            <hr/>
             <ul className="px-4 pb-4 text-sm">
                 <li className="mb-2">
                     <Link href="/user/myprofile" className="block p-2 rounded-md hover:bg-green-50">
@@ -254,7 +275,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </Link>
                 </li>
                 <li className="mb-2">
-                    <Link href="/user/dashboarduser/newsletter" className="block p-2 rounded-md hover:bg-green-50">
+                    <Link href="/user/newsletter/newsletter" className="block p-2 rounded-md hover:bg-green-50">
                         My Newsletter
                     </Link>
                 </li>
@@ -268,9 +289,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             {/* ORDER DETAILS */}
             <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">
                 <p className="mb-0 font-medium typography-headline-5">Order Details</p>
-                <SfIconChevronLeft className="text-neutral-500" />
+                <SfIconChevronLeft className="text-neutral-500"/>
             </div>
-            <hr className="my-2" />
+            <hr className="my-2"/>
             <ul className="px-4 pb-4 text-sm">
                 <li className="mb-2">
                     <Link href="/user/dashboarduser/orders" className="block p-2 rounded-md hover:bg-green-50">
@@ -284,7 +305,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </li>
                 <li>
                     <button
-                        onClick={() => alert('Logged out!')}
+                        onClick={loggout}
                         className="block w-full text-left p-2 rounded-md hover:bg-green-50"
                     >
                         Logout
@@ -296,7 +317,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             <Fragment>
                 <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">
                     <p className="mb-0 font-medium typography-headline-5">Extra Section</p>
-                    <SfIconChevronLeft className="text-neutral-500" />
+                    <SfIconChevronLeft className="text-neutral-500"/>
                 </div>
             </Fragment>
 
@@ -315,4 +336,4 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </div>
         </aside>
     );
-}
+};

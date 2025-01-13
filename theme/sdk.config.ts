@@ -26,17 +26,15 @@
 // }
 //
 // export const sdk=initSDK(sdkConfig)
-import magentoConfig from './middleware.config.ts'; // Import your custom configuration
 
-console.log('deeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee', magentoConfig.integrations.magento.customQueries)
 import { buildModule, initSDK } from '@vue-storefront/sdk';
 import { magentoModule, MagentoModuleType } from '@vue-storefront/magento-sdk';
 
 const sdkConfig = {
-    magento: buildModule<MagentoModuleType>(magentoModule, {
+    magento: buildModule(magentoModule, {
         apiUrl: 'http://localhost:8181/magento',
 
-        ...magentoConfig.integrations.magento,
+        // ...magentoConfig.integrations.magento,
     }),
 
 };

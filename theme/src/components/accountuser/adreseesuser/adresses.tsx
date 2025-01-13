@@ -1,70 +1,173 @@
 import ProductCard from "@/components/categories/productsCart/ProductsCart";
-import React from "react";
-import {SfButton, SfCounter, SfIconFavorite, SfIconShoppingCart, SfLink, SfRating} from "@storefront-ui/react";
+import React, {useMemo} from "react";
+import {
+    SfButton,
+    SfCounter,
+    SfIconFavorite,
+    SfIconShoppingCart,
+    SfLink,
+    SfListItem,
+    SfRating
 
 
-const Adresses = () => {
 
+
+} from "@storefront-ui/react";
+
+import SfList from '@storefront-ui/react';
+
+
+import {useSelector} from "react-redux";
+import {RootState} from "@/store";
+import useSWRMutation from "swr/mutation";
+import {BASEURL} from "@/BASEURL/URL";
+import authenticationuser from "@/utils/authentication";
+import {deleteAdresseCustomer} from "@/store/slices/counterSlice";
+import {useDispatch} from "react-redux";
+
+const Adresses = ({   }) => {
+const adressCustomer=useSelector((state:RootState)=>state?.counter?.adressescustomer)
+    console.log(adressCustomer?.addresses)
     let items=[1,2,3,4,5,6,7,8,9]
+    const [addressid,setAdressid]=React.useState<number>(0)
+const dispatch=useDispatch()
+    const { trigger, data, error, isMutating } = useSWRMutation(
+        `${BASEURL}/api/removeItemfromTowichList/removeItemfromTowichList`,
+        authenticationuser.authentication
+    )
+
+    console.log(data?.data?.data?.deleteCustomerAddress)
+    const handelDelete = async (id:{id:number}) => {
+
+    try {
+        await trigger(id);
+        setAdressid(id)
+
+        console.log('dddddddddddddddddddddddddd', id)
+
+        // return  adressCustomer.addresses.filter((item)=>item.id!==id)
+    }catch (e){
+        throw e
+    }finally {
+        console.log('hellossssssssssssss',id)
+    }
+
+    }
+
+     useMemo(async() => {
+         if(data?.data?.data?.deleteCustomerAddress===true){
+             await dispatch(deleteAdresseCustomer(addressid))
+            }
+
+    }, [data?.data?.data?.deleteCustomerAddress])
+
+
     return (
-        <div>
-            <SfButton className='p-4 border-t border-neutral-200'>Add New Adress</SfButton>
+        <>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {items?.map((item) => (
-                    <div className="border border-neutral-200 rounded-md hover:shadow-lg max-w-[300px]">
+            <div className="p-4">
+                <SfButton className="mb-4">
+                    Add New Address
+                </SfButton>
 
+                {/* Storefront UI List */}
 
-                        <div className="p-4 border-t border-neutral-200">
-                            <div className="relative">
-
+                {adressCustomer?.addresses?.map((item) => (
+                    <SfListItem
+                        key={item.id}
+                        className="mb-2 p-4 border border-neutral-200 rounded-md hover:shadow-lg transition-shadow"
+                    >
+                        <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-center">
+                            <div>
+                                <p className="font-semibold text-base sm:text-lg">
+                                    {item.firstname} {item.lastname}
+                                </p>
+                                <p className="text-sm text-neutral-700 mt-1">
+                                    <strong>Street:</strong> {item.street}
+                                    {item.region?.region ? `, ${item.region.region}` : ''}
+                                </p>
+                                <p className="text-sm text-neutral-700 mt-1">
+                                    <strong>Country:</strong> {item.country_code}
+                                </p>
+                                <p className="text-sm text-neutral-700 mt-1">
+                                    <strong>Telephone:</strong> {item.telephone}
+                                </p>
+                            </div>
+                            <div className="mt-2 sm:mt-0 sm:text-right">
                                 <SfButton
-                                    variant="tertiary"
                                     size="sm"
-                                    square
-                                    // style={{backgroundColor: productsWichList?.some((item) => item.product.sku === sku) === true ? "#000000" : "#ffffff"}}
-                                    className="absolute bottom-0 right-0 mr-2 mb-2 bg-white ring-1 ring-inset ring-neutral-200 !rounded-full"
-                                    aria-label="Add to wishlist"
+                                    variant="secondary"
+
+                                    onClick={async () => {
+                                        await handelDelete(item.id);
+                                    }}
                                 >
-                                    <SfIconFavorite size="sm"
-                                        //                 onClick={async () => {
-                                        //     await HandelSubmit(sku)
-                                        // }}
-                                    />
+                                    remove
                                 </SfButton>
                             </div>
-                            <SfLink href="#" variant="secondary" className="no-underline">
-                                {/*{name}*/}ssasaSAS
-                            </SfLink>
-                            <div className="flex items-center pt-1">
-                                <SfRating size="xs"
-                                    // value={rating_summary} max={review_count}
-                                />
-
-                                <SfLink href="#" variant="secondary" className="pl-1 no-underline">
-                                    <SfCounter size="xs">{123}</SfCounter>
-                                </SfLink>
-                            </div>
-                            <p className="block py-2 font-normal typography-text-sm text-neutral-700">
-                                Lightweight • Non slip • Flexible outsole • Easy to wear on and off
-                            </p>
-                            <span className="block pb-2 font-bold typography-text-lg">$2345,99</span>
-                            <SfButton
-                                //     onClick={(() => {
-                                //     Router.push({
-                                //         pathname: `/about/${url_key}`,
-                                //         query: {sku: sku}
-                                //
-                                //     })
-                                // })}
-                                size="sm" slotPrefix={<SfIconShoppingCart size="sm"/>}>
-                                delete
-                            </SfButton>
                         </div>
-                    </div>
+                    </SfListItem>
                 ))}
+
             </div>
-        </div>
+
+
+
+
+
+        </>
+        // <div>
+        //     <SfButton className='p-4 border-t border-neutral-200'>Add New Adress</SfButton>
+        //
+        //     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        //         {adressCustomer.addresses?.map((item:string,index:number) => (
+        //             <div className="border border-neutral-200 rounded-md hover:shadow-lg max-w-[300px]" key={index} >
+        //
+        //
+        //                 <div className="p-4 border-t border-neutral-200">
+        //                     <div className="relative">
+        //
+        //                         <SfButton
+        //                             variant="tertiary"
+        //                             size="sm"
+        //                             square
+        //                             // style={{backgroundColor: productsWichList?.some((item) => item.product.sku === sku) === true ? "#000000" : "#ffffff"}}
+        //                             className="absolute bottom-0 right-0 mr-2 mb-2 bg-white ring-1 ring-inset ring-neutral-200 !rounded-full"
+        //                             aria-label="Add to wishlist"
+        //                         >
+        //                             <SfIconFavorite size="sm"
+        //                                 //                 onClick={async () => {
+        //                                 //     await HandelSubmit(sku)
+        //                                 // }}
+        //                             />
+        //                         </SfButton>
+        //                     </div>
+        //                     <SfLink href="#" variant="secondary" className="no-underline">
+        //
+        //                       <strong>Nome</strong> : {item.firstname} {item.lastname}
+        //                     </SfLink>
+        //                     <div className="flex items-center pt-1">
+        //                        street: {item.street},{item?.region?.region}
+        //
+        //                         <SfLink href="#" variant="secondary" className="pl-1 no-underline">
+        //                             <SfCounter size="xs">{123}</SfCounter>
+        //                         </SfLink>
+        //                     </div>
+        //                    <strong> country</strong>:{item.country_code}
+        //
+        //                     <span className="block pb-2 font-bold typography-text-lg"> telephone:{item.telephone} </span>
+        //                     <SfButton
+        //                             onClick={(async() => {
+        //                                await handelDelete(item.id)
+        //                         })}
+        //                         size="sm" slotPrefix={<SfIconShoppingCart size="sm"/>}>
+        //                         delete
+        //                     </SfButton>
+        //                 </div>
+        //             </div>
+        //         ))}
+        //     </div>
+        // </div>
     )
 }
 

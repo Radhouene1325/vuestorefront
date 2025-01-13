@@ -89,7 +89,8 @@ console.log(authenticated)
     console.log(counterValue)
     console.log("route", route);
     const [isOpenpanier, setIsOpenpanier] = useState<boolean>(false);
-
+const isAuthenticated=useSelector((state:RootState)=>state.user.nameuser)
+    console.log("isAuthenticated", isAuthenticated)
     const actionItems = [
         {
         // <SfIconFavorite/>
@@ -121,12 +122,11 @@ console.log(authenticated)
         },
         {
             icon: (authenticated?( <div className="relative">
-                <img src="https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/woman_avatar.png" alt="Avatar of a woman" width="36" height="36" />
-                <SfBadge variant="dot" placement="bottom-right" className="!bg-neutral-600 outline outline-white" />
+                {isAuthenticated}
             </div>) :( <SfIconPerson />)),
-            label: 'Log in',
-            ariaLabel: 'Log in',
-            role: 'login',
+            label: 'Login',
+            ariaLabel: 'Login',
+            role:authenticated?'': 'login',
             action: () => {
                 route.push(!authenticated?'/authentication/login/user':'/user/myprofile'); // Navigate to the login page
             },
@@ -387,18 +387,18 @@ console.log(authenticated)
                                             node.isLeaf ? (
                                                 <Fragment key={node.key}>
                                                     <p>{console.log(node)}</p>
-                                                    <SfListItem as="a" size="sm"
+                                                    <Link  size="sm"
 
 
                                                                 href={{
-                                                                    // pathname: `/categorie/${menuNode.url}`,
+                                                                     pathname: `/categorie/${menuNode.url}`,
                                                                     query: {uid: node.key}
                                                                 }}
 
 
                                                                 className="typography-text-sm mb-2">
                                                         {node.value.label}
-                                                    </SfListItem>
+                                                    </Link>
                                                     <div className="col-start-2 col-end-5"/>
                                                 </Fragment>
                                             ) : (
@@ -418,19 +418,19 @@ console.log(authenticated)
                                                                     }}>
                                                                         <li key={child.key}>
 
-                                                                            <Link
+                                                                            <SfListItem
                                                                                 as="a"
                                                                                 size="sm"
-                                                                                // href={child.value.link}
-                                                                                href={{
-                                                                                    pathname: `/categorie/${menuNode.url}/${child.url}`,
-                                                                                    query: {uid: child.key}
-                                                                                }}
+                                                                                 // href={child.value.link}
+                                                                                // href={{
+                                                                                //     pathname: `/categorie/${menuNode.url}/${child.url}`,
+                                                                                //     query: {uid: child.key}
+                                                                                // }}
                                                                                 className="typography-text-sm py-1.5"
 
                                                                             >
                                                                                 {child.value.label}
-                                                                            </Link>
+                                                                            </SfListItem>
                                                                         </li>
                                                                     </Link>
                                                                 ),
@@ -501,7 +501,7 @@ console.log(authenticated)
                                         node.isLeaf ? (
                                             <li key={node.key}>
                                                 <p>  {console.log(node)}</p>
-                                                <SfListItem size="lg" as="a"
+                                                <SfListItem size="lg"
 
                                                             href={{
                                                                 // pathname: `/categorie/${menuNode.url}`,
@@ -521,14 +521,21 @@ console.log(authenticated)
                                             </li>
                                         ) : (
                                             <li key={node.key}>
+                                                <p>  {console.log('hellojdjdjdjjj')}</p>
                                                 <SfListItem size="lg" as="button" type="button"
-                                                            onClick={handleNext(node.key)}
+                                                            onClick={handleNext(node.key)}>
                                                 >
                                                     <div className="flex justify-between items-center">
+                                                        <Link      href={{
+                                                            // pathname: `/categorie/${menuNode.url}`,
+                                                            pathname: `/categorie/${node.url}`,
+                                                            query: {uid: node.key}
+                                                        }}>
                                                         <div className="flex items-center">
                                                             <p className="text-left">{node.value.label}</p>{' '}
                                                             <SfCounter className="ml-2">{node.value.counter}</SfCounter>
                                                         </div>
+                                                        </Link>
                                                         <SfIconChevronRight className="text-neutral-500"/>
                                                     </div>
                                                 </SfListItem>

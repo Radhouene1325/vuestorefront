@@ -1,4 +1,4 @@
-import { type ChangeEvent, type FormEvent, type KeyboardEvent, useState, useRef, useId, useEffect } from 'react';
+import {type ChangeEvent, type FormEvent, type KeyboardEvent, useState, useRef, useId, useEffect, useMemo} from 'react';
 import {
     SfButton,
     SfInput,
@@ -13,14 +13,14 @@ import {
     useTrapFocus,
     useDropdown,
     SfIconCheck,
-    InitialFocusType,
+    InitialFocusType, SfLoaderCircular, SfIconPerson, SfIconLockOpen,
 } from '@storefront-ui/react';
 import classNames from 'classnames';
 import { offset } from '@floating-ui/react-dom';
 import useSWRMutation from "swr/mutation";
 import {BASEURL} from "@/BASEURL/URL";
 import authenticationuser from "@/utils/authentication";
-
+import {useRouter} from "next/router";
 type SelectOption = {
     label: string;
     value: string;
@@ -47,18 +47,18 @@ export default function ResetPassword() {
     const [emailIsInvalid, setEmailIsInvalid] = useState(false);
     const [areaCodeIsInvalid, setAreaCodeIsInvalid] = useState(false);
     const [phoneNumberIsInvalid, setPhoneNumberIsInvalid] = useState(false);
-
+const router=useRouter()
     const {trigger: UPDATEPASSWORD, data: NEWPASSWORD,error:ERROR, isMutating: ISMUTATINGPASSWORD} = useSWRMutation(
         `${BASEURL}/api/changeCustomerPassword/changeCustomerPassword`,
         authenticationuser.authentication
     );
-    const sendFormResstUser = async(event: FormEvent<HTMLFormElement>) => {
+    const sendFormResstUser = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         let formData = new FormData(event.currentTarget);
-        let email=formData.get('email')
-        let currentPassword=formData.get('old-password')
-        let newPassword=formData.get('new-password')
+        let email = formData.get('email')
+        let currentPassword = formData.get('old-password')
+        let newPassword = formData.get('new-password')
         // let phone=formData.get('phone')
 
         await UPDATEPASSWORD({
@@ -67,10 +67,27 @@ export default function ResetPassword() {
             currentPassword,
             newPassword
         })
-console.log(email,currentPassword,newPassword)
-
-
+        console.log(email, currentPassword, newPassword)
     };
+
+    console.log(NEWPASSWORD?.data?.errors)
+
+     useMemo(async() => {
+         if(NEWPASSWORD?.data?.data?.changeCustomerPassword){
+              await   router.push('/')
+            }
+
+    }, [NEWPASSWORD]);
+
+    // if(NEWPASSWORD?.data?.data?.changeCustomerPassword){
+    //     router.push('/')
+    // }
+console.log(ERROR)
+    const [visibolPassword,setVisibolPassword]=useState<boolean>(false)
+
+    const visibol = () => {
+        setVisibolPassword(!visibolPassword);
+    }
     return (
         <div className="flex justify-center items-start  min-h-screen bg-gray-50 px-4">
             <div className="w-full max-w-2xl bg-white shadow-md rounded-md p-6">
@@ -105,7 +122,8 @@ console.log(email,currentPassword,newPassword)
                         <SfInput
                             name="old-password"
                             // value={phoneNumber}
-                            type="password"
+                            type={visibolPassword ? 'text' : "password"}
+                            slotPrefix={<SfIconPerson/>} slotSuffix={<SfIconLockOpen onClick={visibol}/>}
                             invalid={phoneNumberIsInvalid}
                             required
                             placeholder="e.g. 123 456 7890"
@@ -128,7 +146,8 @@ console.log(email,currentPassword,newPassword)
                         <SfInput
                             name="new-password"
                             // value={phoneNumber}
-                            type="password"
+                            type={visibolPassword ? 'text' : "password"}
+                            slotPrefix={<SfIconPerson/>} slotSuffix={<SfIconLockOpen onClick={visibol}/>}
                             //invalid={phoneNumberIsInvalid}
                             required
                             placeholder="e.g. 123 456 7890"
@@ -150,6 +169,43 @@ console.log(email,currentPassword,newPassword)
                         >
                             Submit
                         </button>
+
+                        {
+                            ISMUTATINGPASSWORD && (
+                                <div className="flex gap-4 flex-wrap">
+                                    <SfLoaderCircular className="!text-cyan-700" size="2xl"/>
+
+                                </div>
+                            )
+
+
+                        }
+                        {
+                            NEWPASSWORD?.data?.errors && (
+                                <div
+                                    role="alert"
+                                    className="flex items-start md:items-center max-w-[600px] shadow-md bg-negative-100 pr-2 pl-4 ring-1 ring-negative-300 typography-text-sm md:typography-text-base py-1 rounded-md"
+                                >
+                                    <p className="py-2 mr-2">The password change was failed.</p>
+
+
+                                </div>
+
+                            )
+                        }
+                        {
+                            NEWPASSWORD?.data?.data?.changeCustomerPassword && (
+                                <div
+                                    role="alert"
+                                    className="flex items-start md:items-center max-w-[600px] shadow-md bg-positive-100 pr-2 pl-4 ring-1 ring-positive-200 typography-text-sm md:typography-text-base py-1 rounded-md"
+                                >
+                                    <p className="py-2 mr-2">The password change was secces please login again.</p>
+
+
+                                </div>
+
+                            )
+                        }
                     </div>
                 </form>
             </div>

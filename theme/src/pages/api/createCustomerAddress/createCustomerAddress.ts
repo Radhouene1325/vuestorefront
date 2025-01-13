@@ -43,9 +43,9 @@ let {formattedCode}=req.body;
 
         country_code: country,
 
-        default_billing: true,
+        default_billing: false,
 
-        default_shipping: true,
+        default_shipping: false,
 
         firstname: firstname,
 

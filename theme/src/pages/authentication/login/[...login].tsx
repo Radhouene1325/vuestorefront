@@ -46,7 +46,7 @@ export default function Login({token, cartId}) {
             <div className="py-8 px-4 sm:px-6 lg:px-8  w-4/5 m-auto">
                 <Loginuser/>
             </div>
-            <div>{router.query?.login}</div>
+            {/*<div>{router.query?.login}</div>*/}
         </main>
 
 

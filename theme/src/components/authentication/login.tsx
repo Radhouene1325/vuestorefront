@@ -15,7 +15,7 @@ import {
     SfIconCheck,
     InitialFocusType, SfIconLockOpen, SfIconPerson,
 } from '@storefront-ui/react';
-import {useDispatch}from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import classNames from 'classnames';
 import { offset } from '@floating-ui/react-dom';
 import useSWRMutation from "swr/mutation";
@@ -23,6 +23,8 @@ import {BASEURL} from "@/BASEURL/URL";
 import authenticationuser from "@/utils/authentication";
 import {useRouter} from "next/router";
 import {authntication} from '@/store/slices/userSlice'
+import {RootState} from "@/store";
+import Newcount from "@/components/accountuser/profileuser/newcount";
 type SelectOption = {
     email: string;
     password: string;
@@ -87,58 +89,74 @@ const dispatch=useDispatch()
 
     }
 
+let isauth=useSelector((state:RootState)=>state.user.isAuth)
+
+
+    const [personalInformation, setPersonalInformation] = useState<boolean>(false);
+
+    const handelRegister=()=>{
+        setPersonalInformation(!personalInformation)
+    }
 
     return (
-        <div className="px-4">
-            <h1 className="mb-4 typography-headline-4 font-bold">Personal information</h1>
-            <form onSubmit={handleSubmit}>
+        <>
 
-                <label className="block my-4">
-                    <span className="typography-label-sm font-medium">Email *</span>
-                    <SfInput
+            <div className="px-4">
+                <h1 className="mb-4 typography-headline-4 font-bold">Personal information</h1>
+                <form onSubmit={handleSubmit}>
 
-                        type="email"
-                        name="email"
-                        required
-                        invalid={emailIsInvalid}
-                        slotPrefix={<SfIconEmail/>}
-                        // onInput={() => (email ? setEmailIsInvalid(false) : setEmailIsInvalid(true))}
-                        // onBlur={() => (email ? setEmailIsInvalid(false) : setEmailIsInvalid(true))}
-                        // onChange={(event) => setEmail(event.target.value)}
-                    />
-                    {emailIsInvalid && (
-                        <p className="mt-0.5 text-negative-700 typography-text-sm font-medium">The field cannot be
-                            empty</p>
-                    )}
-                </label>
+                    <label className="block my-4">
+                        <span className="typography-label-sm font-medium">Email *</span>
+                        <SfInput
+                            disabled={personalInformation}
+                            type="email"
+                            name="email"
+                            required
+                            invalid={emailIsInvalid}
+                            slotPrefix={<SfIconEmail/>}
+                            // onInput={() => (email ? setEmailIsInvalid(false) : setEmailIsInvalid(true))}
+                            // onBlur={() => (email ? setEmailIsInvalid(false) : setEmailIsInvalid(true))}
+                            // onChange={(event) => setEmail(event.target.value)}
+                        />
+                        {emailIsInvalid && (
+                            <p className="mt-0.5 text-negative-700 typography-text-sm font-medium">The field cannot be
+                                empty</p>
+                        )}
+                    </label>
 
-                <label className="block my-4">
-                    <span className="typography-label-sm font-medium">Password *</span>
-                    <SfInput
+                    <label className="block my-4">
+                        <span className="typography-label-sm font-medium">Password *</span>
+                        <SfInput
+                            disabled={personalInformation}
+                            name="password"
+                            type={visibolPassword ? "text" : "password"}
+                            required
+                            slotPrefix={<SfIconPerson/>} slotSuffix={<SfIconLockOpen onClick={visibol}/>}
+                            // onInput={() => (email ? setPasswordIsInvalid(false) : setPasswordIsInvalid(true))}
+                            // onBlur={() => (email ? setPasswordIsInvalid(false) : setPasswordIsInvalid(true))}
+                            // onChange={(event) => setEmail(event.target.value)}
+                        />
+                        {passwordInvalid && (
+                            <p className="mt-0.5 text-negative-700 typography-text-sm font-medium">The field cannot be
+                                empty</p>
+                        )}
+                    </label>
 
-                        name="password"
-                        type={visibolPassword?"text":"password"}
-                        required
-                        slotPrefix={<SfIconPerson />} slotSuffix={<SfIconLockOpen onClick={visibol} />}
-                        // onInput={() => (email ? setPasswordIsInvalid(false) : setPasswordIsInvalid(true))}
-                        // onBlur={() => (email ? setPasswordIsInvalid(false) : setPasswordIsInvalid(true))}
-                        // onChange={(event) => setEmail(event.target.value)}
-                    />
-                    {passwordInvalid && (
-                        <p className="mt-0.5 text-negative-700 typography-text-sm font-medium">The field cannot be
-                            empty</p>
-                    )}
-                </label>
+                    <div className="flex gap-x-4 md:justify-end mt-6">
+                        <SfButton variant="secondary" className="flex-grow md:flex-grow-0" onClick={handelRegister}>
+                            New count
+                        </SfButton>
+                        <SfButton type="submit" className="flex-grow md:flex-grow-0" disabled={personalInformation}>
+                            Submit
+                        </SfButton>
+                    </div>
+                </form>
 
-                <div className="flex gap-x-4 md:justify-end mt-6">
-                    <SfButton variant="secondary" className="flex-grow md:flex-grow-0">
-                        Clear all
-                    </SfButton>
-                    <SfButton type="submit" className="flex-grow md:flex-grow-0">
-                        Submit
-                    </SfButton>
-                </div>
-            </form>
-        </div>
+
+            </div>
+            {
+                personalInformation && <Newcount/>
+            }
+        </>
     );
 }

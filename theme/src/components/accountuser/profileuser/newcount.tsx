@@ -13,187 +13,27 @@ import {
     useTrapFocus,
     useDropdown,
     SfIconCheck,
-    InitialFocusType,
+    InitialFocusType, SfIconPerson, SfIconLockOpen,
 } from '@storefront-ui/react';
 import classNames from 'classnames';
 import { offset } from '@floating-ui/react-dom';
+import useSWRMutation from "swr/mutation";
+import {BASEURL} from "@/BASEURL/URL";
+import authenticationuser from "@/utils/authentication";
+import { SfIconCheckCircle, SfIconClose } from '@storefront-ui/react';
 
 type SelectOption = {
     label: string;
     value: string;
 };
 
-const emailNotificationOptions = [
-    {
-        label: 'Safety Alerts and Messages *',
-        value: 'safety-alerts',
-        hint: 'Get notified when something goes wrong on your profile',
-        disabled: true,
-        checked: true,
-    },
-    {
-        label: 'Deals and Offers',
-        value: 'deals-and-offers',
-        hint: 'Once a week you will receive information about upcoming offers',
-    },
-    {
-        label: 'Company Information',
-        value: 'company-information',
-        hint: 'Reports and information about planned changes',
-    },
-];
-const radioOptions = [
-    {
-        label: 'Everything',
-        value: 'everything',
-        name: 'radio-1',
-    },
-    {
-        label: 'Same as email',
-        value: 'same-as-email',
-        name: 'radio-1',
-    },
-    {
-        label: 'No push notifications',
-        value: 'no-push',
-        name: 'radio-1',
-    },
-];
-const dropdownOptions = [
-    {
-        label: 'Fashion and Apparel',
-        value: 'Fashion and Apparel',
-    },
-    {
-        label: 'Health and Wellness',
-        value: 'Health and Wellness',
-    },
-    {
-        label: 'Home Decor',
-        value: 'Home Decor',
-    },
-    {
-        label: 'Technology and Gadgets',
-        value: 'Technology and Gadgets',
-    },
-    {
-        label: 'Beauty and Cosmetics',
-        value: 'Beauty and Cosmetics',
-    },
-    {
-        label: 'Outdoor and Adventure',
-        value: 'Outdoor and Adventure',
-    },
-    {
-        label: 'Parenting and Baby Products',
-        value: 'Parenting and Baby Products',
-    },
-    {
-        label: 'Books and Literature',
-        value: 'Books and Literature',
-    },
-    {
-        label: 'Sports and Fitness',
-        value: 'Sports and Fitness',
-    },
-    {
-        label: 'Food and Cooking',
-        value: 'Food and Cooking',
-    },
-];
-const options = [
-    {
-        label: 'Afghanistan',
-        value: 'afghanistan',
-    },
-    {
-        label: 'Albania',
-        value: 'albania',
-    },
-    {
-        label: 'Angola',
-        value: 'angola',
-    },
-    {
-        label: 'Bahamas',
-        value: 'bahamas',
-    },
-    {
-        label: 'Bangladesh',
-        value: 'bangladesh',
-    },
-    {
-        label: 'Canada',
-        value: 'canada',
-    },
-    {
-        label: 'Chile',
-        value: 'chile',
-    },
-    {
-        label: 'Czech Republic',
-        value: 'czech Republic',
-    },
-    {
-        label: 'Colombia',
-        value: 'colombia',
-    },
-    {
-        label: 'Congo',
-        value: 'congo',
-    },
-    {
-        label: 'Croatia',
-        value: 'croatia',
-    },
-    {
-        label: 'Cuba',
-        value: 'cuba',
-    },
-    {
-        label: 'Denmark',
-        value: 'denmark',
-    },
-    {
-        label: 'Dominica',
-        value: 'dominica',
-    },
-    {
-        label: 'Egypt',
-        value: 'egypt',
-    },
-    {
-        label: 'Ethiopia',
-        value: 'ethiopia',
-    },
-    {
-        label: 'Estonia',
-        value: 'estonia',
-    },
-];
-const areaCodes = [
-    { label: '1', value: '1' },
-    { label: '20', value: '20' },
-    { label: '45', value: '45' },
-    { label: '53', value: '53' },
-    { label: '56', value: '56' },
-    { label: '57', value: '57' },
-    { label: '93', value: '93' },
-    { label: '243', value: '243' },
-    { label: '244', value: '244' },
-    { label: '251', value: '251' },
-    { label: '355', value: '355' },
-    { label: '372', value: '372' },
-    { label: '385', value: '385' },
-    { label: '420', value: '420' },
-    { label: '880', value: '880' },
-];
+
 
 export default function Newcount() {
     const [personalInformation, setPersonalInformation] = useState(true);
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
-    const [website, setWebsite] = useState('');
+    const [firstname, setFisrtname] = useState('');
+    const [lastname, setLastname] = useState('');
     const [areaCode, setAreaCode] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [description, setDescription] = useState('');
@@ -209,167 +49,84 @@ export default function Newcount() {
     const [areaCodeIsInvalid, setAreaCodeIsInvalid] = useState(false);
     const [phoneNumberIsInvalid, setPhoneNumberIsInvalid] = useState(false);
 
-    function handleEmailNotifications(event: ChangeEvent) {
-        const { value } = event.target as HTMLInputElement;
-        return emailNotifications.indexOf(value) > -1
-            ? setEmailNotifications(emailNotifications.filter((option) => value !== option))
-            : setEmailNotifications([...emailNotifications, value]);
-    }
+const {trigger, data,error, isMutating}=useSWRMutation(
+    `${BASEURL}/api/createCustomer/createCustomer`,
+    authenticationuser.createNewUser
+)
 
-    const comboboxInputRef = useRef<HTMLInputElement>(null);
-    const comboboxDropdownRef = useRef<HTMLUListElement>(null);
 
-    const { isOpen: isOpenCombobox, close: closeCombobox, open: openCombobox, toggle: toggleCombobox } = useDisclosure();
-    const { refs: comboboxRefs, style: comboboxStyle } = useDropdown({
-        isOpen: isOpenCombobox,
-        onClose: closeCombobox,
-        placement: 'bottom-start',
-        middleware: [offset(4)],
-    });
-    const comboboxId = useId();
-    const comboboxListId = useId();
-
-    const {
-        current: currentFocus,
-        focusables: focusableElements,
-        updateFocusableElements,
-    } = useTrapFocus(comboboxDropdownRef, {
-        trapTabs: false,
-        arrowKeysUpDown: true,
-        activeState: isOpenCombobox,
-        initialFocus: false,
-    });
-
-    const handleFocusInput = () => {
-        comboboxInputRef.current?.focus();
-    };
-
-    const handleReset = () => {
-        setSearchValue('');
-        setSnippets([]);
-        closeCombobox();
-    };
-
-    const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-        const phrase = event.target.value;
-        setSelectedValueCombobox('');
-        if (phrase) {
-            setSearchValue(phrase);
-        } else {
-            handleReset();
-        }
-    };
-
-    const handleInputKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Escape') handleReset();
-        if (event.key === 'Enter') closeCombobox();
-        if (event.key === 'ArrowUp') {
-            openCombobox();
-            updateFocusableElements();
-            if (isOpenCombobox && focusableElements.length > 0) {
-                focusableElements[focusableElements.length - 1].focus();
-            }
-        }
-        if (event.key === 'ArrowDown') {
-            openCombobox();
-            updateFocusableElements();
-            if (isOpenCombobox && focusableElements.length > 0) {
-                focusableElements[0].focus();
-            }
-        }
-    };
-
-    const selectOptionCombobox = (event: FormEvent, option: SelectOption) => {
-        setSearchValue(option.label);
-        setSelectedValueCombobox(option.label);
-        closeCombobox();
-        handleFocusInput();
-    };
-
-    const handleOptionItemKeyDownCombobox = (event: KeyboardEvent<HTMLButtonElement>, option: SelectOption) => {
-        if (event.key === 'Escape') {
-            handleFocusInput();
-        } else if (event.key === ' ' || event.key === 'Enter') selectOptionCombobox(event, option);
-    };
-
-    const mockAutocompleteRequest = (phrase: string) => {
-        const results = options.filter((option) => option.value.toLowerCase().startsWith(phrase.toLowerCase()));
-        return results;
-    };
-
-    useEffect(() => {
-        if (searchValue && !selectedValueCombobox) {
-            const getSnippets = async () => {
-                openCombobox();
-                try {
-                    const data = await mockAutocompleteRequest(searchValue);
-                    setSnippets(data);
-                } catch (error) {
-                    closeCombobox();
-                    console.error(error);
-                }
-            };
-            getSnippets();
-        }
-    }, [searchValue]);
-
-    const { close, toggle, isOpen } = useDisclosure();
-    const [selectedOption, setSelectedOption] = useState<SelectOption>();
-    const id = useId();
-    const listboxId = useId();
-    const selectTriggerRef = useRef<HTMLDivElement>(null);
-
-    const { refs, style: dropdownStyle } = useDropdown({ isOpen, onClose: close });
-
-    useTrapFocus(refs.floating, {
-        arrowKeysUpDown: true,
-        activeState: isOpen,
-        initialFocus: InitialFocusType.autofocus,
-    });
-
-    const selectOption = (option: SelectOption) => {
-        setSelectedOption(option);
-        close();
-        selectTriggerRef.current?.focus();
-    };
-
-    const handleTriggerKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === ' ') toggle();
-    };
-
-    const handleOptionItemKeyDown = (event: KeyboardEvent<HTMLLIElement>, option: SelectOption) => {
-        if (event.key === ' ' || event.key === 'Enter') selectOption(option);
-    };
-
-    const handleSelectChange = (event: ChangeEvent) => {
-        setAreaCode((event.target as HTMLInputElement)?.value);
-        return areaCode ? setAreaCodeIsInvalid(false) : setAreaCodeIsInvalid(true);
-    };
-
-    const sendForm = (event: React.FormEvent) => {
+    const sendForm =async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const userData = {
-            personalInformation,
-            username,
-            email,
-            website,
-            phone: {
-                code: areaCode,
-                number: phoneNumber,
-            },
-            country: selectedValueCombobox,
-            interests: selectedOption?.label,
-            description,
-            emailNotifications,
-            pushNotifications,
-        };
+        const formData = new FormData(event.currentTarget);
 
-        console.log(userData);
+        let email = formData.get('email');
+        setEmail(email)
+        let password = formData.get('password');
+
+        let firstname = formData.get('firstname');
+        setFisrtname(firstname)
+        let lastname = formData.get('lastname');
+        setLastname(lastname)
+
+
+        if (email && password && firstname && lastname) {
+            await trigger({email,password,firstname,lastname})
+        }
+
+
     };
+   // console.log(data.data.errors)
+    const [visibolPassword,setVisibolPassword]=useState<boolean>(false)
 
+    const visibol = () => {
+        setVisibolPassword(!visibolPassword);
+    }
+    // data?.data?.errors?
     return (
         <div className="flex justify-center items-start  min-h-screen bg-gray-50 px-4">
             <div className="w-full max-w-2xl bg-white shadow-md rounded-md p-6">
+                {data?.data?.data?.createCustomerV2?.customer &&
+                    (<div
+                            role="alert"
+                            className="flex items-start md:items-center max-w-[600px] shadow-md bg-positive-100 pr-2 pl-4 ring-1 ring-positive-200 typography-text-sm md:typography-text-base py-1 rounded-md"
+                        >
+                            <SfIconCheckCircle className="my-2 mr-2 text-positive-700 shrink-0"/>
+                            <p className="py-2 mr-2">new account is create seccsefely.</p>
+                            <button
+                                type="button"
+                                className="p-1.5 md:p-2 ml-auto rounded-md text-positive-700 hover:bg-positive-200 active:bg-positive-300 hover:text-positive-800 active:text-positive-900 focus-visible:outline focus-visible:outline-offset"
+                                aria-label="Close positive alert"
+                            >
+                                <SfIconClose className="hidden md:block"/>
+                                <SfIconClose size="sm" className="block md:hidden"/>
+                            </button>
+                        </div>
+                    )
+                }
+                {data?.data?.errors && (
+                    <div
+                        role="alert"
+                        className="flex items-start md:items-center max-w-[600px] shadow-md bg-negative-100 pr-2 pl-4 ring-1 ring-negative-300 typography-text-sm md:typography-text-base py-1 rounded-md"
+                    >
+                        <p className="py-2 mr-2">{data?.data?.errors.map(e=>e.message)} </p>
+                        <button
+                            type="button"
+                            className="py-1.5 px-3 md:py-2 md:px-4 rounded-md text-negative-700 hover:bg-negative-200 active:bg-negative-300 hover:text-negative-800 active:text-negative-900 ml-auto font-medium focus-visible:outline focus-visible:outline-offset"
+                        >
+                            Retry
+                        </button>
+                        <button
+                            type="button"
+                            className="p-1.5 md:p-2 ml-2 rounded-md text-negative-700 hover:bg-negative-200 active:bg-negative-300 hover:text-negative-800 active:text-negative-900 focus-visible:outline focus-visible:outline-offset"
+                            aria-label="Close error alert"
+                        >
+                            <SfIconClose className="hidden md:block"/>
+                            <SfIconClose size="sm" className="block md:hidden"/>
+                        </button>
+                    </div>
+                )}
+
+
                 <h1 className="mb-6 text-3xl font-bold text-center">Add now count</h1>
                 <form onSubmit={sendForm} className="space-y-6">
                     {/* Personal Information Toggle */}
@@ -382,19 +139,13 @@ export default function Newcount() {
                 First Name *
               </span>
                             <SfInput
-                                value={username}
+                                // value={username}
                                 invalid={usernameIsInvalid}
                                 required
-                                onInput={() =>
-                                    username ? setUsernameIsInvalid(false) : setUsernameIsInvalid(true)
-                                }
-                                onBlur={() =>
-                                    username ? setUsernameIsInvalid(false) : setUsernameIsInvalid(true)
-                                }
-                                onChange={(event) => setUsername(event.target.value)}
+                                name='firstname'
                                 className="w-full"
                             />
-                            {usernameIsInvalid && (
+                            {!firstname && (
                                 <p className="mt-1 text-sm text-red-600">
                                     The field cannot be empty
                                 </p>
@@ -406,19 +157,14 @@ export default function Newcount() {
                 Last Name *
               </span>
                             <SfInput
-                                value={username}
+                                // value={username}
+                                name='lastname'
                                 invalid={usernameIsInvalid}
                                 required
-                                onInput={() =>
-                                    username ? setUsernameIsInvalid(false) : setUsernameIsInvalid(true)
-                                }
-                                onBlur={() =>
-                                    username ? setUsernameIsInvalid(false) : setUsernameIsInvalid(true)
-                                }
-                                onChange={(event) => setUsername(event.target.value)}
+
                                 className="w-full"
                             />
-                            {usernameIsInvalid && (
+                            {!lastname && (
                                 <p className="mt-1 text-sm text-red-600">
                                     The field cannot be empty
                                 </p>
@@ -432,17 +178,17 @@ export default function Newcount() {
                             Email *
                         </label>
                         <SfInput
-                            value={email}
+                            // value={email}
                             type="email"
+                            name='email'
+                            placeholder="e.g. <EMAIL>"
                             required
                             invalid={emailIsInvalid}
                             slotPrefix={<SfIconEmail/>}
-                            onInput={() => (email ? setEmailIsInvalid(false) : setEmailIsInvalid(true))}
-                            onBlur={() => (email ? setEmailIsInvalid(false) : setEmailIsInvalid(true))}
-                            onChange={(event) => setEmail(event.target.value)}
+
                             className="w-full"
                         />
-                        {emailIsInvalid && (
+                        {!email && (
                             <p className="mt-1 text-sm text-red-600">
                                 The field cannot be empty
                             </p>
@@ -455,19 +201,15 @@ export default function Newcount() {
                             Password *
                         </label>
                         <SfInput
-                            value={phoneNumber}
-                            type="password"
-                            invalid={phoneNumberIsInvalid}
+                            // value={phoneNumber}
+                            type={visibolPassword ? 'text' : "password"}
+                            name='password'
+                            slotPrefix={<SfIconPerson/>} slotSuffix={<SfIconLockOpen onClick={visibol}/>}
+                            // invalid={phoneNumberIsInvalid}
                             required
                             placeholder="e.g. 123 456 7890"
                             className="w-full placeholder-gray-500"
-                            onInput={() =>
-                                phoneNumber ? setPhoneNumberIsInvalid(false) : setPhoneNumberIsInvalid(true)
-                            }
-                            onBlur={() =>
-                                phoneNumber ? setPhoneNumberIsInvalid(false) : setPhoneNumberIsInvalid(true)
-                            }
-                            onChange={(event) => setPhoneNumber(event.target.value)}
+
                         />
                         {phoneNumberIsInvalid && (
                             <p className="mt-1 text-sm text-red-600">

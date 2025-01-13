@@ -15,7 +15,7 @@ import { parse } from "cookie";
 import {useDispatch, useSelector, useStore} from "react-redux";
 import {AppDispatch, RootState, wrapper} from "@/store";
 import {GetServerSideProps, GetServerSidePropsContext} from "next";
-import {authntication, quantityCart} from "@/store/slices/userSlice";
+import {authntication, quantityCart, usernamecustomer} from "@/store/slices/userSlice";
 import {setHeaderCategories} from "@/store/slices/categorieSlice";
 import {sdk} from "../../sdk.config";
 
@@ -133,8 +133,8 @@ console.log('111111111  premier partie de la condition',cartId);
                 }
             });
             const isAuth = await sdk.magento.requestPasswordResetEmail({email: customer.data.customer.email}, {});
-            console.log('isAuth', isAuth);
-
+            console.log('isAutdddddddddddddddddddddddddddddddddddddddh', customer);
+            store.dispatch(usernamecustomer(customer?.data?.customer?.firstname));
 
             const {data: {data: {createEmptyCart: createEmptyCart}}} = await fetchHomePage.createEmptyCart(token);
 

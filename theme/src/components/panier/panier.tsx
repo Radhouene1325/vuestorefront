@@ -112,7 +112,7 @@ interface PannierProps {
     [key: string]: any;
 }
 
-export default function Pannier({ item, ...rest }: PannierProps) {
+export default function Pannier({item, ...rest}: PannierProps) {
     // Destructure relevant fields from `item`
     const {
         product,
@@ -141,8 +141,12 @@ export default function Pannier({ item, ...rest }: PannierProps) {
       - Username: ${username}
     `);
     };
+    let [deleteItem, setDeleteItem] = useState<string>('');
+console.log(deleteItem)
+    console.log(product)
 
     return (
+
         <div className="max-w-[376px] md:max-w-[768px] border border-neutral-200 rounded-md p-4 w-11/12  my-4">
 
             {/* Form for reviewing the product in the pannier (cart item) */}
@@ -170,8 +174,8 @@ export default function Pannier({ item, ...rest }: PannierProps) {
                     <p className="text-neutral-700">
                         Quantity: <span className="font-semibold">{quantity}</span>
                     </p>
-                    <QuantitySelector/>
 
+                    <QuantitySelector product={product}  setDeleteItem={setDeleteItem} deleteItem={deleteItem}/>
 
 
                     <p className="text-neutral-900 mt-2">
@@ -187,6 +191,9 @@ export default function Pannier({ item, ...rest }: PannierProps) {
             </form>
         </div>
     );
-}
+
+
+
+};
 
 

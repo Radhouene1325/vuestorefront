@@ -9,7 +9,8 @@ export interface UserState {
     cardLength:number
     varientLengthInCart:number
 
-    auth:boolean
+    auth:boolean,
+    nameuser:string
 }
 
 const initialState: UserState = {
@@ -18,7 +19,8 @@ const initialState: UserState = {
 
     cardLength:0,
     varientLengthInCart:0,
-    auth:false
+    auth:false,
+    nameuser:''
 };
 
 export const userSlice = createSlice({
@@ -56,6 +58,11 @@ export const userSlice = createSlice({
             state.auth = action.payload
         },
 
+
+        usernamecustomer: (state, action: PayloadAction<string>) => {
+            state.nameuser = action.payload;
+        }
+
     },
 
     extraReducers: (builder) => {
@@ -70,7 +77,7 @@ export const userSlice = createSlice({
 });
 
 
-export const {authntication,resetState, dec, inc,addProductToCart,quantityCart,quantitiyVarientIncart } = userSlice.actions;
+export const {authntication,resetState, dec, inc,addProductToCart,quantityCart,quantitiyVarientIncart,usernamecustomer } = userSlice.actions;
 
 
 export const quantityVarientIncartSelector = (state:any) => state.user.varientLengthInCart;

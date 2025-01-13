@@ -123,14 +123,15 @@ export default function AddressCustmer({data, customerCart,addresses}) {
     console.log(streetIsValid)
 
 
-        const handleSelectED = async (event: ChangeEvent<HTMLSelectElement>) => {
-        const adress = event.target.value; // Get the selected value (country ID)
-        console.log(adress);
-        console.log('Selected country:', adress);
-        // if(selectedCountry){
-        //     await REGION(selectedCountry)
-        // }
-    };
+    // const handleSelect = async (event: ChangeEvent<HTMLSelectElement>) => {
+    //     const adress = event.target.value; // Get the selected value (country ID)
+    //     console.log(adress);
+    //     console.log('Selected country:', adress);
+    //     // if(selectedCountry){
+    //     //     await REGION(selectedCountry)
+    //     // }
+    // };
+
 
 
     return (
@@ -178,7 +179,7 @@ export default function AddressCustmer({data, customerCart,addresses}) {
                                 onChange={handleSelect}
                                 disabled={isMutating}
                             >
-                                {countries.map((countryName) => (
+                                {countries.map((countryName:any) => (
                                     <option key={countryName.id} value={countryName.id}>
                                         {countryName.full_name_english}
                                     </option>
@@ -196,7 +197,7 @@ export default function AddressCustmer({data, customerCart,addresses}) {
                                 required
                                 disabled={isMutating}
                             >
-                                {region?.data?.available_regions?.map((region) => (
+                                {region?.data?.available_regions?.map((region: { id: React.Key | readonly string[] | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => (
                                     <option key={region.id} value={region.id}>
                                         {region.name}
                                     </option>
