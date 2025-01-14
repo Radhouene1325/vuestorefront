@@ -83,7 +83,7 @@ console.log(persistor)
         ));
 
     const PageContent =  (
-        // <PersistGate  persistor={store.__persistor}>
+         //<PersistGate  persistor={store.__persistor}>
             <Component {...props.pageProps} />
         // </PersistGate>
     )

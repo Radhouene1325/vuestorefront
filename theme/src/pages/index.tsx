@@ -25,6 +25,9 @@ import {
     queryProductsAndIdwichList, test
 } from "../../customQueryMagento/queryProductsWichList";
 import {wichListProducts, wichListProductsLength} from '@/store/slices/wichlistSlice';
+import {getCookie} from "cookies-next";
+import jwt from "jsonwebtoken";
+import {destroyCookie} from "nookies";
 
 
 
@@ -66,18 +69,33 @@ export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps
     getState: () => RootState
 }) => async (context: GetServerSidePropsContext) => {
     const {req, res} = context;
+    console.log('the req', req.headers)
 
-
+    const cookies = [];
     //console.log(req.headers)
 
 
-    const cookies = parse(req.headers.cookie || "");
+    const cookiess = parse(req.headers.cookie || "");
     // console.log("Cart ID from Cookie:", cookies['auth-token']);
-    const cartId = cookies['cart-id'] as string;
-    let token = cookies['auth-token'] as string;
+    const cartId = cookiess['cart-id'] as string;
+    let token = cookiess['auth-token'] as string;
+    /////thes if fonctionne correctly
+    // if (token) {
+    //     // Set Set-Cookie header to remove it
+    //     cookies.push(
+    //         serialize('auth-token', '', {
+    //             httpOnly: true, // Prevent JavaScript access
+    //             secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    //             path: "/", // Make cookie accessible across the site
+    //             maxAge:0
+    //         })
+    //     );
+    //
+    // }
 
 
-    const {data: {data: {categories: items}}, error, loading} = await fetchHomePage.HomePage()
+
+    const {data: {data: {categories: items}}, error, loading} = await fetchHomePage.HomePage(token as string)
 
 
     await store.dispatch(setHeaderCategories(items))
@@ -85,7 +103,7 @@ export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps
 
     const {data: {data: products}} = await fetchHomePage.NewProducts()
     if (cartId === undefined || token || cartId !== undefined && token === undefined) {
-        const cookies = [];
+
 console.log('111111111  premier partie de la condition',cartId);
         if(cartId!==undefined && token===undefined){
             // const {data: {data: {createEmptyCart: createEmptyCart}}} = await fetchHomePage.createEmptyCart(token);
@@ -119,7 +137,7 @@ console.log('111111111  premier partie de la condition',cartId);
 
             cookies.push(
                 serialize('cart-id', createEmptyCart, {
-                    httpOnly: false, // Prevent JavaScript access
+                    httpOnly: true, // Prevent JavaScript access
                     secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
                     path: "/", // Make cookie accessible across the site
                     maxAge: 60 * 60 * 24 * 7, // 1 week
@@ -130,14 +148,14 @@ console.log('111111111  premier partie de la condition',cartId);
         } else if (token!==undefined) {
 
 
-            console.log('111111111  premier partie de la condition');
+
             const customer = await sdk.magento.customer({
                 customHeaders: {
                     Authorization: `Bearer ${token || ''}`,
                 }
             });
             const isAuth = await sdk.magento.requestPasswordResetEmail({email: customer.data.customer.email}, {});
-            console.log('isAutdddddddddddddddddddddddddddddddddddddddh', customer);
+
             store.dispatch(usernamecustomer(customer?.data?.customer?.firstname));
 
             const {data: {data: {createEmptyCart: createEmptyCart}}} = await fetchHomePage.createEmptyCart(token);
@@ -150,7 +168,6 @@ console.log('111111111  premier partie de la condition',cartId);
 
             if (cartId === undefined) {
 
-                console.log('111111111  premier seconde de la condition')
 
 
                 const {data: {data: {cart: total_quantity}}} = await fetchHomePage.cartTotalQty(createEmptyCart, token);  //the create empty cart is the id of the cart
@@ -168,16 +185,12 @@ console.log('111111111  premier partie de la condition',cartId);
 
             } else if (cartId === createEmptyCart) {
 
-                console.log('111111111  3eme partie de la condition')
-
                 const {data: {data: {cart: total_quantity}}} = await fetchHomePage.cartTotalQty(cartId, token);  //the create empty cart is the id of the cart
                 // console.log("", total_quantity)
 
                 await store.dispatch(quantityCart(total_quantity?.total_quantity ? total_quantity?.total_quantity : 0))
 
             } else {
-                console.log('111111111  4eme partie de la condition')
-
                 const params = {
 
                     sourceCartId: cartId,  ///thes the first gestCart
@@ -208,7 +221,7 @@ console.log('111111111  premier partie de la condition',cartId);
 
                     cookies.push(
                         serialize('cart-id', id, {
-                            httpOnly: false, // Prevent JavaScript access
+                            httpOnly: true, // Prevent JavaScript access
                             secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
                             path: "/", // Make cookie accessible across the site
                             maxAge: 60 * 60 * 24 * 7, // 1 week

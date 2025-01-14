@@ -33,9 +33,10 @@ interface QuantitySelectorProps {
     }
 }
 
-export default function QuantitySelector({product, setDeleteItem, deleteItem, item}: QuantitySelectorProps) {
+export default function QuantitySelector({product, setDeleteItem, deleteItem, item}: QuantitySelectorProps) {+
+    console.log(item)
     const inputId = useId();
-    const min = 1;
+    const min = item?.quantity ?? 1;
     const max = 10;
     const [value, {inc, dec, set}] = useCounter(min);
 const dispatch = useDispatch();
@@ -55,29 +56,37 @@ console.log(value)
         fetchHomePage.removeItemFromCart
     )
 
-    const handelItemIncartVarient = async (event: string | undefined) => {
+    const handelDleteItenFromCart = async (event: string | undefined) => {
         console.log(event)
 
 
-        await trigger(event as string)
+       let x= await trigger(event as string)
+        // console.log(x)
+        // console.log(x?.data?.data?.removeItemFromCart?.cart)
+        if(x?.data?.data?.removeItemFromCart?.cart) {
+console.log('data?.data?.data?.removeItemFromCart?.cart')
+            dispatch(cartProducts(x?.data?.data?.removeItemFromCart?.cart));
+            dispatch(quantityCart(x?.data?.data?.removeItemFromCart?.cart.total_quantity));
+        }
+
     };
 
 
     useMemo(() => {
 
 
-        if (data?.data?.data?.removeItemFromCart?.cart) {
-
-            dispatch(cartProducts(data?.data?.data?.removeItemFromCart?.cart));
-            dispatch(quantityCart(data?.data?.data?.removeItemFromCart?.cart.total_quantity))
-
-        }
+        // if (data?.data?.data?.removeItemFromCart?.cart) {
+        //
+        //     dispatch(cartProducts(data?.data?.data?.removeItemFromCart?.cart));
+        //     dispatch(quantityCart(data?.data?.data?.removeItemFromCart?.cart.total_quantity))
+        //
+        // }
         if (data2?.data?.data?.updateCartItems?.cart) {
 
             dispatch(cartProducts(data2?.data?.data?.updateCartItems?.cart));
             dispatch(quantityCart(data2?.data?.data?.updateCartItems?.cart.total_quantity))
         }
-    }, [data,data2]);
+    }, [data2]);
 
     useMemo(async () => {
         if (value) {
@@ -101,7 +110,7 @@ console.log(value)
                     variant="tertiary"
                     square
                     className="rounded-r-none"
-                    disabled={value <= min}
+                    // disabled={value <= min}
                     aria-controls={inputId}
                     aria-label="Decrease value"
                     onClick={() => dec()}
@@ -141,7 +150,7 @@ console.log(value)
                 aria-label="Remove"
                 type="button"
                 className="text-neutral-500 text-xs font-light ml-auto flex items-center px-3 py-1.5"
-                onClick={() => handelItemIncartVarient(item?.uid)}
+                onClick={() => handelDleteItenFromCart(item?.uid)}
             >
                 <SfIconDelete/>
                 <span className="hidden ml-1.5 sm:block">Remove</span>

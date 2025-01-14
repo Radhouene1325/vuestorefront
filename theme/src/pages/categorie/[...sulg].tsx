@@ -142,12 +142,12 @@ const [isFlterOpen, setIsFilerOpen] = React.useState<boolean>(true);
     console.log(router);
 
     return (
-        <main className="py-8 px-4 sm:px-6 lg:px-8">
-             Centered container with max width
+        <main className="py-6 px-4 sm:px-6 lg:px-8">
+
             <div className="max-w-screen-xl mx-auto">
 
                 {/* Breadcrumbs */}
-                <Breadcrumbse path={router.asPath}/>
+               {/* <Breadcrumbse path={router.asPath}/>*/}
 
                 {/* Page title */}
                 <h1 className="text-xl font-bold my-4">Browser Products Categories</h1>
@@ -162,7 +162,7 @@ const [isFlterOpen, setIsFilerOpen] = React.useState<boolean>(true);
                 {/* Main content layout:
             - On small screens: vertical stacking (flex-col)
             - On medium+ screens: side-by-side layout (flex-row) */}
-                <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex flex-col md:flex-row gap-3">
 
                     {/* Sidebar (filters):
               - Takes full width on mobile
@@ -174,7 +174,7 @@ const [isFlterOpen, setIsFilerOpen] = React.useState<boolean>(true);
                     {/* Products section:
               - Takes full width on mobile
               - Expands to 3/4 on medium screens */}
-                    <div className="w-full md:w-3/4 flex flex-col gap-8">
+                    <div className="w-full md:w-3/4 flex flex-col gap-2">
                         <h2 className="text-lg font-bold">Products Categories</h2>
 
                         {/* Responsive grid for product cards:

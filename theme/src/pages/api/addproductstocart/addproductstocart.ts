@@ -150,7 +150,7 @@ console.log('response', response);
                 res.setHeader(
                     'Set-Cookie',
                     serialize('cart-id', createEmptyCart, {
-                        httpOnly: false,
+                        httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
                         path: '/',
                         maxAge: 60 * 60 * 24 * 7, // 1 week

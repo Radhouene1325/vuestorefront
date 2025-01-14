@@ -1,18 +1,32 @@
+
+
 import { NextApiRequest, NextApiResponse } from 'next';
+import { getCookie } from 'cookies-next';
+import { serialize } from 'cookie';
+import jwt from 'jsonwebtoken';
 
-export async function authMiddleware(req: NextApiRequest, res: NextApiResponse, next: () => Promise<void>) {
-    console.log( '4444444444444444444444',  await req.headers.cookie);
-    const token = req.headers.cookie;
-    if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' });
-    }
+export async function authMiddleware(
+    req: NextApiRequest,
+    res: NextApiResponse,
+    next: () => Promise<void>
+) {
 
-    // Optionally validate the token (e.g., decode JWT or check session)
-    // const isValid = await validateToken(token); // Implement this function
-    // if (!isValid) {
-    //     return res.status(401).json({ error: 'Invalid token' });
-    // }
 
-    // Call the next function to continue execution
-    await next();
+        // 1. Get the token from cookie
+        const tokenee = await getCookie('auth-token', { req, res }) as string | undefined;
+
+
+
+        if(!tokenee){
+            return
+        }
+
+
+
+        await next();
+
 }
+
+
+
+

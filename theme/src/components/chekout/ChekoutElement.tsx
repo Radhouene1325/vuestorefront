@@ -211,8 +211,9 @@ const router = useRouter();
         {
             alert(index.error.message)
         }else {
-            router.push({
+            await router.push({
                 pathname: `/payment-success/${index.data.data.placeOrder.order.order_number}`,
+                query: index.data.data.placeOrder.order.order_number
             })
         }
 

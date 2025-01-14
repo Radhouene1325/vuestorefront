@@ -1,14 +1,27 @@
 import { BASEURL } from "@/BASEURL/URL";
+
+import { parseCookies, setCookie, destroyCookie } from 'nookies';
+
 import axios from "axios";
 const fetchHomePage = {
-    HomePage:async()=>{
+    HomePage:async(token:string)=>{
 
             try {
-                const response = await fetch(`${BASEURL}/api/hello`);
+                const response = await fetch(`${BASEURL}/api/hello`,{
+                    headers: {
+                        'Content-Type': 'application/json',
+                        cookie:`auth-token=${token}`
+                    },
+                });
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json();
+                // if (data) {
+                //     destroyCookie({response}, 'auth-token', {
+                //         path: '/',
+                //     });
+                // }
                 return data; // Return the fetched data
             } catch (error) {
                 console.error('Error fetching data:', error);

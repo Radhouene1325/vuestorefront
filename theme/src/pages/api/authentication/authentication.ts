@@ -6,6 +6,7 @@ import { serialize } from "cookie";
 import {GenerateCustomerTokenInput, GenerateCustomerTokenResponse} from "@vue-storefront/magento-sdk";
 import {MethodOptions} from "@vue-storefront/magento-sdk/lib/types";
  import {CustomQuery} from "@vue-storefront/middleware";
+import jwt from 'jsonwebtoken';
 
 export declare function generateCustomerToken<RES extends GenerateCustomerTokenResponse>(
 
@@ -38,8 +39,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("the response",response);
 
     const token = response.data.generateCustomerToken.token;
-
+    const decoded = jwt.decode(token, process.env.JWT_SECRET as string);
+    console.log('decodecccccccccsssssssssssssssssssssssssssscccccccccccccccccd', decoded)
     // Serialize the cookie
+    const currentTime = Math.floor(Date.now() / 1000)
+    console.log('asssssssssssss', currentTime)
+    const expirationTime = decoded.exp as number; ///thes expire time for the token
+
+    const expiresIn = expirationTime - currentTime
+
+    if (expiresIn > 0) {
+        console.log(`Token will expire in ${expiresIn} seconds.`);
+    } else {
+        console.log('Token has already expired.');
+    }
+
     if (!token) {
         return res.status(500).json({ message: 'Token generation failed.' });
     }
@@ -51,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             secure: process.env.NODE_ENV === "production", // Use secure cookies in production
             sameSite: "strict", // Protect against CSRF
             path: "/", // Make cookie accessible across the site
-            maxAge: 60 * 60 * 24 * 7, // 1 week
+            maxAge: expirationTime, // 1 week
         })
     );
 

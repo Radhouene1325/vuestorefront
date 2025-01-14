@@ -34,7 +34,7 @@ export interface Availablepayment {
 }
 
 const Prod = ({cart}) => {
-
+console.log(cart)
     // console.log(customerCart)
     console.log(cart)
     const dispatch = useDispatch();
