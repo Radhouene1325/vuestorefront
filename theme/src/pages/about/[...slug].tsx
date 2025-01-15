@@ -15,11 +15,11 @@ import {useSelector} from "react-redux";
 const Index = ({items}) => {
     const ref=useRef(null)
     const router=useRouter()
-    console.log(router.query.slug)
+    console.log(router.query)
     console.log(items)
 
     // let {data: {data: {products:items}}} = res;
-    console.log(items)
+    console.log(items.items)
     console.log(ref.current)
     const counterValue = useSelector((state: RootState) => state.user.products);
     console.log(counterValue)
@@ -35,7 +35,7 @@ const Index = ({items}) => {
                 </div>
             </div>
             <Review/>
-            <Productesrelited/>
+            <Productesrelited items={items}/>
             <NewsletterBox/>
         </main>
 
@@ -44,11 +44,12 @@ const Index = ({items}) => {
 };
 
 export const getServerSideProps = async (context) => {
-    const {sku} = context.query;
-    console.log(sku)
-    const {data: {data: {products: items}}} = await fetchHomePage.ProductsDetails(sku)
+    const data = context.query;
+    console.log(data)
+    console.log("Server hello khalfa");
+    const {data: {data: {products: items}}} = await fetchHomePage.ProductsDetails(data)
 
-    console.log("Route parameter (slug):", sku);
+    console.log("Route parameter (slug):", data);
     return {
         props: {items}
     }

@@ -12,7 +12,7 @@ import {
     SfIconAdd,
     SfIconWarehouse,
     SfIconSafetyCheck,
-    SfIconShoppingCartCheckout,
+    SfIconShoppingCartCheckout, SfIconClose,
 } from '@storefront-ui/react';
 import { useCounter } from 'react-use';
 import {useId, ChangeEvent, FormEvent, useMemo} from 'react';
@@ -84,6 +84,8 @@ export default function InfoProductesDetaisl({items}:ProductItemsProps) {
     const [params, setParams] = useState<string[]>([])
     const [paramsColor, setParamsColor] = useState<string[]>([])
 
+console.log(paramsColor)
+    console.log(params);
 
 
 
@@ -123,7 +125,7 @@ console.log(description)
         `${BASEURL}/api/addproductstocart/addproductstocart`,
         sendData
     );
-     console.log(data)
+     console.log(data?.data?.errors)
 
     // let {addProductsToCart:{addProductsToCart:cart}} =data?.data?.data
     // console.log(cart)
@@ -137,7 +139,7 @@ console.log(description)
     };
      useMemo(()=>{
          if (data) {
-             dispatch(quantityCart(data.data.data.addProductsToCart.cart.total_quantity))
+             dispatch(quantityCart(data?.data?.data?.addProductsToCart?.cart?.total_quantity))
          }
 
      },[data])
@@ -146,7 +148,7 @@ console.log(description)
     useMemo(()=>{
       const   handelItemIncartVarient=()=>{
           console.log(uid)
-            let verify=data?.data.data.addProductsToCart.cart.items.filter(item=>
+            let verify=data?.data?.data?.addProductsToCart?.cart?.items?.filter(item=>
                  item.product.uid == uid
             )
           console.log(verify)
@@ -167,6 +169,68 @@ console.log(items.items.some(e => e?.configurable_options))
                 <SfIconSell size="sm" className="mr-1.5"/>
                 Sale
             </div>
+            {data?.data?.errors ? (
+                <>
+
+                    {
+                        paramsColor.length === 0 && (
+
+
+                            <div
+                                role="alert"
+                                className="flex items-start md:items-center max-w-[600px] shadow-md bg-negative-100 pr-2 pl-4 ring-1 ring-negative-300 typography-text-sm md:typography-text-base py-1 rounded-md"
+                            >
+                                <p className="py-2 mr-2">please select color in required.</p>
+                                <button
+                                    type="button"
+                                    className="py-1.5 px-3 md:py-2 md:px-4 rounded-md text-negative-700 hover:bg-negative-200 active:bg-negative-300 hover:text-negative-800 active:text-negative-900 ml-auto font-medium focus-visible:outline focus-visible:outline-offset"
+                                >
+                                    Retry
+                                </button>
+                                <button
+                                    type="button"
+                                    className="p-1.5 md:p-2 ml-2 rounded-md text-negative-700 hover:bg-negative-200 active:bg-negative-300 hover:text-negative-800 active:text-negative-900 focus-visible:outline focus-visible:outline-offset"
+                                    aria-label="Close error alert"
+                                >
+                                    <SfIconClose className="hidden md:block"/>
+                                    <SfIconClose size="sm" className="block md:hidden"/>
+                                </button>
+                            </div>
+
+
+                        )
+                    }
+                    {
+                        params.length === 0 && (
+
+
+                            <div
+                                role="alert"
+                                className="flex items-start md:items-center max-w-[600px] shadow-md bg-negative-100 pr-2 pl-4 ring-1 ring-negative-300 typography-text-sm md:typography-text-base py-1 rounded-md"
+                            >
+                                <p className="py-2 mr-2">please select size for the products  in required.</p>
+                                <button
+                                    type="button"
+                                    className="py-1.5 px-3 md:py-2 md:px-4 rounded-md text-negative-700 hover:bg-negative-200 active:bg-negative-300 hover:text-negative-800 active:text-negative-900 ml-auto font-medium focus-visible:outline focus-visible:outline-offset"
+                                >
+                                    Retry
+                                </button>
+                                <button
+                                    type="button"
+                                    className="p-1.5 md:p-2 ml-2 rounded-md text-negative-700 hover:bg-negative-200 active:bg-negative-300 hover:text-negative-800 active:text-negative-900 focus-visible:outline focus-visible:outline-offset"
+                                    aria-label="Close error alert"
+                                >
+                                    <SfIconClose className="hidden md:block"/>
+                                    <SfIconClose size="sm" className="block md:hidden"/>
+                                </button>
+                            </div>
+
+
+                        )
+                    }
+                </>
+            ) : null
+            }
             <h1 className="mb-1 font-bold typography-headline-4">
                 {name}
             </h1>
@@ -184,17 +248,17 @@ console.log(items.items.some(e => e?.configurable_options))
 
                 <li dangerouslySetInnerHTML={{__html: description.html}}></li>
                 {items.items.some(e => e?.configurable_options) ? (<>
-                        <ColorFilter
-                            colorList={colorList} setColorList={setColorList}
-                            configurable_options={configurable_options}
-                            opened={opened} setOpened={setOpened} setParamsColor={setParamsColor} paramsColor={paramsColor}
-                        />)
+                    <ColorFilter
+                        colorList={colorList} setColorList={setColorList}
+                        configurable_options={configurable_options}
+                        opened={opened} setOpened={setOpened} setParamsColor={setParamsColor} paramsColor={paramsColor}
+                    />)
                     < SizeFilter
-                    configurable_options={configurable_options}
-                    selectedSizes={selectedSizes} setSelectedSizes={setSelectedSizes}
-                    opened={opened} setOpened={setOpened} params={params} setParams={setParams}
+                        configurable_options={configurable_options}
+                        selectedSizes={selectedSizes} setSelectedSizes={setSelectedSizes}
+                        opened={opened} setOpened={setOpened} params={params} setParams={setParams}
                     />
-                    </>):null
+                </>) : null
                 }
 
             </ul>
@@ -290,4 +354,5 @@ console.log(items.items.some(e => e?.configurable_options))
             </div>
         </section>
     );
+
 }

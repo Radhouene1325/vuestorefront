@@ -45,7 +45,7 @@ interface Tab {
 
 const tabs: Tab[] = [
     { label: 'AccountUser'},
-    { label: 'New-count' },
+    // { label: 'New-count' },
     { label: 'Reseter-Password' },
     { label: 'Support' },
     { label: 'Delivery & Returns' },
@@ -149,13 +149,13 @@ export default function TabsBasic({customer}:{customer: Props}) {
                             },
 
 
-                            {
-                                <main className="p-4 text-neutral-500">
-                                    {tab.label === 'New-count' && (
-                                        <Newcount/>
-                                    )}
-                                </main>
-                            },
+                            {/*{*/}
+                            {/*    <main className="p-4 text-neutral-500">*/}
+                            {/*        {tab.label === 'New-count' && (*/}
+                            {/*            <Newcount/>*/}
+                            {/*        )}*/}
+                            {/*    </main>*/}
+                            {/*},*/}
 
                             {
                                 <main className="p-4 text-neutral-500">

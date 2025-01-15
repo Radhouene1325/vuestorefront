@@ -1,80 +1,142 @@
-import { SfButton } from '@storefront-ui/react';
+import Slider from 'react-slick';
+import {
+    SfLink,
+    SfButton,
+    SfIconFavorite,
+    SfIconChevronLeft,
+    SfIconChevronRight,
+    SfScrollable,
+} from '@storefront-ui/react';
+import classNames from 'classnames';
+import {useRouter} from "next/router";
 
-const cardDetails = [
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-3.png',
-        title: 'Sip Sustainably: The Rise of Boxed Water',
-        description:
-            'Boxed water is a sustainable alternative to traditional plastic bottles, made from renewable resources.',
-        button: 'Read more',
-    },
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-2.png',
-        title: 'Ride the Future: Exploring the Benefits of e-Bikes',
-        description:
-            'Eco-friendly, efficient, and fun modes of transportation that provide a range of benefits for riders and the environment.',
-        button: 'Read more',
-    },
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-1.png',
-        title: 'Unleash the Ultimate Listening Experience',
-        description:
-            'Audiophile headphones offer unmatched sound quality and clarity, making them the go-to choice for music enthusiasts.',
-        button: 'Read more',
-    },
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-1.png',
-        title: 'Unleash the Ultimate Listening Experience',
-        description:
-            'Audiophile headphones offer unmatched sound quality and clarity, making them the go-to choice for music enthusiasts.',
-        button: 'Read more',
-    },
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-1.png',
-        title: 'Unleash the Ultimate Listening Experience',
-        description:
-            'Audiophile headphones offer unmatched sound quality and clarity, making them the go-to choice for music enthusiasts.',
-        button: 'Read more',
-    },
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-1.png',
-        title: 'Unleash the Ultimate Listening Experience',
-        description:
-            'Audiophile headphones offer unmatched sound quality and clarity, making them the go-to choice for music enthusiasts.',
-        button: 'Read more',
-    },
-    {
-        image: 'https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/card-1.png',
-        title: 'Unleash the Ultimate Listening Experience',
-        description:
-            'Audiophile headphones offer unmatched sound quality and clarity, making them the go-to choice for music enthusiasts.',
-        button: 'Read more',
-    },
-];
 
-export default function Productesrelited() {
+
+
+function ButtonPrev({ disabled, ...attributes }: { disabled?: boolean }) {
     return (
-        <div className="flex flex-wrap gap-4 lg:gap-6 lg:flex-nowrap">
-            {cardDetails.map(({ image, title, description, button }) => (
-                <div
-                    key={title}
-                    className="flex flex-col min-w-[325px] max-w-[375px] lg:w-[496px] relative border border-neutral-200 rounded-md hover:shadow-xl"
-                >
-                    <a
-                        className="absolute inset-0 z-1 focus-visible:outline focus-visible:outline-offset focus-visible:rounded-md"
-                        href="#"
-                        aria-label={title}
-                    />
-                    <img src={image} alt={title} className="object-cover h-auto rounded-t-md aspect-video" />
-                    <div className="flex flex-col items-start p-4 grow">
-                        <p className="font-medium typography-text-base">{title}</p>
-                        <p className="mt-1 mb-4 font-normal typography-text-sm text-neutral-700">{description}</p>
-                        <SfButton size="sm" variant="tertiary" className="relative mt-auto">
-                            {button}
-                        </SfButton>
-                    </div>
-                </div>
-            ))}
-        </div>
+        <SfButton
+            className={classNames('absolute !rounded-full z-10 left-4 bg-white hidden md:block', {
+                '!hidden': disabled,
+            })}
+            variant="secondary"
+            size="lg"
+            square
+            {...attributes}
+        >
+            <SfIconChevronLeft />
+        </SfButton>
     );
 }
+
+ButtonPrev.defaultProps = { disabled: false };
+
+function ButtonNext({ disabled, ...attributes }: { disabled?: boolean }) {
+    return (
+        <SfButton
+            className={classNames('absolute !rounded-full z-10 right-4 bg-white hidden md:block', {
+                '!hidden': disabled,
+            })}
+            variant="secondary"
+            size="lg"
+            square
+            {...attributes}
+        >
+            <SfIconChevronRight />
+        </SfButton>
+    );
+}
+
+ButtonNext.defaultProps = { disabled: false };
+interface ProductesrelitedProps {
+    items?: { items: { variants: { product: any; }[] }[] }
+}
+
+
+// Slider settings
+
+export default function Productesrelited({items}: ProductesrelitedProps) {
+    const route=useRouter()
+
+    console.log(route.query.slug)
+
+    return (
+
+        //
+        //
+
+
+        <SfScrollable
+            className="m-auto py-4 items-center w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+            buttons-placement="floating"
+            drag
+            slotPreviousButton={<ButtonPrev/>}
+            slotNextButton={<ButtonNext/>}
+        >
+
+            {items?.items?.map(({variants}) =>
+
+
+
+                    <>
+                        {
+                            variants?.map(({product}) => (
+                                <div
+                                     key={product.uid}
+                                    className="first:ms-auto last:me-auto ring-1 ring-inset ring-neutral-200 shrink-0 rounded-md hover:shadow-lg w-[148px] lg:w-[192px]"
+                                >
+                                    {/*<a*/}
+                                    {/*    className="absolute inset-0 z-1 focus-visible:outline focus-visible:outline-offset focus-visible:rounded-md"*/}
+                                    {/*    href="#"*/}
+                                    {/*    aria-label={product.name}*/}
+                                    {/*/>*/}
+
+                                    <div className="relative">
+                                        <SfLink href="#" className="block">
+                                            <img src={product.media_gallery.map((url: string) => url.url)}
+                                                 className="block object-cover h-auto rounded-md aspect-square lg:w-[190px] lg:h-[190px]"/>
+                                        </SfLink>
+                                    </div>
+
+                                    <div className="flex flex-col items-start p-4 grow">
+                                        <p className="font-medium typography-text-base">Price:{product.price_range.minimum_price.final_price.value}EURO</p>
+                                        {/*<p className="mt-1 mb-4 font-normal typography-text-sm text-neutral-700">SASAASASAASA</p>*/}
+                                        <SfButton size="sm" variant="tertiary" className="relative mt-auto"
+                                        onClick={(async ()=>{
+                                            let data = variants.filter(e => e.product.uid === product.uid);
+                                            console.log(data)
+                                            let infovarient = data[0]?.attributes
+
+
+                                                const object: { object: { colorCode: number; sizeCode: number } } = {
+                                                    object: {
+                                                        colorCode: infovarient[0]?.value_index,
+                                                        sizeCode: infovarient[1]?.value_index
+                                                    }
+                                                }
+                                            console.log(object);
+                                            await route.push({
+                                                pathname: `/about/${route.query.slug}/${product.sku}`,
+                                                query: {sku: JSON.stringify(object)},
+
+                                            });
+                                        })}
+                                        >
+                                            {product.name}
+                                        </SfButton>
+                                    </div>
+                                </div>
+
+                            ))
+                        }
+                    </>
+            )
+
+            }
+        </SfScrollable>
+
+
+    );
+
+
+};

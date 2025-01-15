@@ -4,12 +4,14 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
 export interface ProductsState {
     cartProducts:any
+    productsIsFiltered:any
 }
 
 
 const initialState: ProductsState = {
 
-    cartProducts:{}
+    cartProducts:{},
+    productsIsFiltered:{}
 
 }
 
@@ -22,6 +24,11 @@ const productsSlice = createSlice({
     reducers:{
         cartProducts: (state,action:PayloadAction) => {
             state.cartProducts = action.payload
+        },
+
+        productsiltred: (state,action:PayloadAction) => {
+            state.productsIsFiltered = action.payload;
+
         }
 
     }

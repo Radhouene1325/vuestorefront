@@ -24,7 +24,7 @@ export default function ProductCard({item}) {
         await fetch('http://localhost:3000/api/addproductstocart/addproductstocart')
 
     };
-    const {name, price_range, thumbnail, rating_summary, review_count, sku, url_key} = item;
+    const {name, price_range, thumbnail, rating_summary, review_count, sku,url_rewrites, url_key} = item;
     console.log(url_key)
     console.log(sku)
 
@@ -94,13 +94,13 @@ export default function ProductCard({item}) {
                     variant="tertiary"
                     size="sm"
                     square
-                    style={{backgroundColor: productsWichList?.some((item)=>item.product.sku===sku)===true ? "#000000" : "#ffffff" }}
+                    style={{backgroundColor: productsWichList?.some((item) => item.product.sku === sku) === true ? "#000000" : "#ffffff"}}
                     className="absolute bottom-0 right-0 mr-2 mb-2 bg-white ring-1 ring-inset ring-neutral-200 !rounded-full"
                     aria-label="Add to wishlist"
                 >
-                    {authenticated===true?<SfIconFavorite size="sm" onClick={async () => {
+                    {authenticated === true ? <SfIconFavorite size="sm" onClick={async () => {
                         await HandelSubmit(sku)
-                    }}/>:null}
+                    }}/> : null}
                 </SfButton>
             </div>
             <div className="p-4 border-t border-neutral-200">
@@ -108,7 +108,7 @@ export default function ProductCard({item}) {
                     {name}
                 </SfLink>
                 <div className="flex items-center pt-1">
-                    <SfRating size="xs" value={rating_summary} max={review_count} />
+                    <SfRating size="xs" value={rating_summary} max={review_count}/>
 
                     <SfLink href="#" variant="secondary" className="pl-1 no-underline">
                         <SfCounter size="xs">{123}</SfCounter>
@@ -118,11 +118,13 @@ export default function ProductCard({item}) {
                     Lightweight • Non slip • Flexible outsole • Easy to wear on and off
                 </p>
                 <span className="block pb-2 font-bold typography-text-lg">$2345,99</span>
-                <SfButton onClick={(()=>{Router.push({
-                    pathname: `/about/${url_key}`,
-                   query: {sku: sku}
+                <SfButton onClick={(async () => {
+                    await Router.push({
+                        pathname: `/about/${url_rewrites.map((item) => item.url).join('/')}`,
+                        query: {sku: sku}
 
-                })})} size="sm" slotPrefix={<SfIconShoppingCart size="sm" />}>
+                    });
+                })} size="sm" slotPrefix={<SfIconShoppingCart size="sm"/>}>
                     Add to cart
                 </SfButton>
             </div>

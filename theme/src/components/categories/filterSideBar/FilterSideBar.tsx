@@ -14,9 +14,13 @@ import {
     SfSelect,
     SfCheckbox,
 } from '@storefront-ui/react';
-import {Fragment, useState} from 'react';
+import {Fragment, useMemo, useState} from 'react';
 import classNames from 'classnames';
 import {Aggregations} from "@/pages/categorie/[...sulg]";
+import useSWRMutation from "swr/mutation";
+import {BASEURL} from "@/BASEURL/URL";
+import fetchHomePage from "@/utils/fetchHomePage";
+import {useRouter} from "next/router";
 
 const sortOptions = [
     {id: 'sort1', label: 'Relevance', value: 'relevance'},
@@ -189,22 +193,27 @@ interface FiltersSideBarProps {
 }
 
 export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
+    const router = useRouter();
+    console.log(router.query);
+    const {uid} = router.query;
     console.log(aggregations);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
     const [price, setPrice] = useState<string | null>(null);
     const [rating, setRating] = useState<string | null>(null);
-    const [opened, setOpened] = useState<string[]>(aggregations.map((item) => item.attribute_code));
+    const [opened, setOpened] = useState<string[]>(aggregations?.map((item) => item.attribute_code) || []);
     console.log(selectedFilters);
     console.log(price);
     console.log(rating);
 
+    const [valueselected, setValueselected] = useState<Record<string, string>>({});
 
     const isAccordionItemOpen = (attribute_code: string) => opened.includes(attribute_code);
-    const isFilterSelected = (selectedValue: string) => selectedFilters.includes(selectedValue);
-
+    const isFilterSelected = (selectedValue: string) => Object.values(valueselected).includes(selectedValue);
     const handleFilterSelection = (selectedValue: string) => {
+        console.log(selectedValue);
         if (selectedFilters.indexOf(selectedValue) > -1) {
             setSelectedFilters([...selectedFilters.filter((value) => value !== selectedValue)]);
+
         } else {
             setSelectedFilters([...selectedFilters, selectedValue]);
         }
@@ -218,11 +227,54 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
         }
     };
 
+    console.log(opened);
     const handleClearFilters = () => {
-        setSelectedFilters([]);
-        setPrice(null);
-        setRating(null);
+        // setSelectedFilters([]);
+        // setPrice(null);
+        // setRating(null);
+        setValueselected({})
     };
+
+
+    const handelSelectAttribute = (e) => {
+        // console.log(attribute_code);
+        // const x = opened.includes(attribute_code);
+        // console.log(x)
+        // if(x) {
+        //
+        //
+        //
+        //     let selected = aggregations?.filter((item) => item.attribute_code === attribute_code);
+        //     console.log(selected);
+        //
+        // }
+
+        setValueselected({
+            ...valueselected,
+            [e.target.name]: e.target.value
+        })
+
+    }
+    console.log(valueselected);
+
+
+    const {trigger, data, error, isMutating} = useSWRMutation(
+        (arg: string | string[][] | Record<string, string> | URLSearchParams | undefined) => {
+            const query = new URLSearchParams(arg).toString();
+
+            return `${BASEURL}/api/productsCategory/productsCategories/${query}`;
+        },
+
+
+        fetchHomePage.filterProducts
+    );
+    
+
+    console.log(data);
+    let handelShowProducts = async () => {
+        await trigger({valueselected, uid})
+    }
+
 
     return (
         <aside className="w-full md:max-w-[376px]">
@@ -247,15 +299,16 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                 Filter
             </h5>
             {
-                aggregations.map((section,index) => {
+                aggregations?.map((section, index) => {
                     return (
                         <Fragment key={section.attribute_code}>
                             <SfAccordionItem
                                 onToggle={handleToggle(section.attribute_code)}
                                 open={isAccordionItemOpen(section.attribute_code)}
+                                // onClick={() => handelSelectAttribute(section.attribute_code)}
                                 summary={
                                     <div className="flex justify-between p-2 mb-2">
-                                        <p className="mb-2 font-medium typography-headline-5">{section.summary}</p>
+                                        <p className="mb-2 font-medium typography-headline-5">{section.label}</p>
                                         <SfIconChevronLeft
                                             className={classNames(
                                                 'text-neutral-500',
@@ -271,12 +324,14 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                             <li key={index}>
                                                 <SfChip
                                                     size="sm"
+
                                                     className="w-full"
                                                     inputProps={{
                                                         value,
+                                                        name: "size",
                                                         disabled: !count,
                                                         checked: isFilterSelected(value),
-                                                        onChange: (event) => handleFilterSelection(event.target.value),
+                                                        onChange: (event) => handelSelectAttribute(event),
                                                     }}
                                                 >
                                                     {label}
@@ -291,16 +346,17 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                         <li>
                                             <SfListItem size="sm" as="button" type="button">
                                              <span className="flex items-center">
-                                              <SfIconArrowBack size="sm" className="text-neutral-500 mr-3"/>
-                                                Back to {section.options[0].label}
+                                              {/*<SfIconArrowBack size="sm" className="text-neutral-500 mr-3"/>*/}
+                                                 Back to {section.options[0].label}
                                                </span>
                                             </SfListItem>
                                         </li>
-                                        {section.options.map(({id, link, label, count,value}, categoryIndex) => (
+                                        {section.options.map(({id, link, label, count, value}, categoryIndex) => (
                                             <li key={id}>
                                                 <SfListItem
                                                     size="sm"
                                                     as="a"
+                                                    name="category"
                                                     // href={link}
                                                     value={value}
                                                     className={classNames('first-of-type:mt-2 rounded-md active:bg-primary-100', {
@@ -308,21 +364,27 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                                     })}
                                                     slotSuffix={categoryIndex === 0 &&
                                                         <SfIconCheck size="sm" className="text-primary-700"/>}
+                                                    // selected={categoryIndex === 0}
+                                                    onChange={(event) => {
+                                                        handelSelectAttribute(event);
+                                                    }}
                                                 >
-                      <span className="flex items-center">
-                        {label}
-                          <SfCounter className="ml-2 typography-text-sm font-normal">{count}</SfCounter>
-                      </span>
+                                                  <span className="flex items-center">
+                                                     {label}
+                                                      <SfCounter
+                                                          className="ml-2 typography-text-sm font-normal">{count}</SfCounter>
+                                                     </span>
                                                 </SfListItem>
                                             </li>
                                         ))}
                                     </ul>
                                 )}
-                                {section.attribute_code === 'color' &&section.label==="Color" &&
+                                {section.attribute_code === 'color' && section.label === "Color" &&
                                     section.options.map(({id, label, value, count}) => (
                                         <SfListItem
                                             key={id}
                                             as="label"
+
                                             size="sm"
                                             className={classNames('px-1.5 bg-transparent hover:bg-transparent', {
                                                 'font-medium': isFilterSelected(value),
@@ -332,16 +394,17 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                                 <>
                                                     <input
                                                         value={value}
+                                                        name="color"
                                                         checked={isFilterSelected(value)}
                                                         className="appearance-none peer"
                                                         type="checkbox"
                                                         onChange={(event) => {
-                                                            handleFilterSelection(event.target.value);
+                                                            handelSelectAttribute(event);
                                                         }}
                                                     />
                                                     <span
                                                         className="inline-flex items-center justify-center p-1 transition duration-300 rounded-full cursor-pointer ring-1 ring-neutral-200 ring-inset outline-offset-2 outline-secondary-600 peer-checked:ring-2 peer-checked:ring-primary-700 peer-hover:bg-primary-100 peer-[&:not(:checked):hover]:ring-primary-200 peer-active:bg-primary-200 peer-active:ring-primary-300 peer-disabled:cursor-not-allowed peer-disabled:bg-disabled-100 peer-disabled:opacity-50 peer-disabled:ring-1 peer-disabled:ring-disabled-200 peer-disabled:hover:ring-disabled-200 peer-checked:hover:ring-primary-700 peer-checked:active:ring-primary-700 peer-focus-visible:outline">
-                        <SfThumbnail size="sm" style={{backgroundColor:label}}/>
+                        <SfThumbnail size="sm" style={{backgroundColor: label}}/>
                       </span>
                                                 </>
                                             }
@@ -352,12 +415,13 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                             </p>
                                         </SfListItem>
                                     ))}
-                                {section.attribute_code === "material" && section.label==="Material" &&
+                                {section.attribute_code === "material" && section.label === "Material" &&
                                     section.options.map(({label, value, count}) => (
                                         <SfListItem
                                             key={value}
                                             as="label"
                                             size="sm"
+                                            name="material"
                                             disabled={count === 0}
                                             className={classNames('px-1.5 bg-transparent hover:bg-transparent', {
                                                 'font-medium': isFilterSelected(value),
@@ -366,10 +430,11 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                                 <SfCheckbox
                                                     className="flex items-center"
                                                     disabled={count === 0}
+                                                    name="material"
                                                     value={value}
                                                     checked={isFilterSelected(value)}
                                                     onChange={(event) => {
-                                                        handleFilterSelection(event.target.value);
+                                                        handelSelectAttribute(event);
                                                     }}
                                                 />
                                             }
@@ -386,6 +451,7 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                             <SfListItem
                                                 key={value}
                                                 as="label"
+                                                name="price"
                                                 size="sm"
                                                 disabled={count === 0}
                                                 className={classNames('px-1.5 bg-transparent hover:bg-transparent', {
@@ -393,12 +459,16 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                                 })}
                                                 slotPrefix={
                                                     <SfRadio
+                                                        name="price"
+
                                                         className="flex items-center"
                                                         disabled={count === 0}
                                                         value={value}
-                                                        checked={price === value}
-                                                        name="radio-price"
-                                                        onChange={() => setPrice(price === value ? null : value)}
+                                                        checked={valueselected.price === value}
+
+                                                        onChange={(e) => {
+                                                            handelSelectAttribute(e);
+                                                        }}
                                                     />
                                                 }
                                             >
@@ -414,6 +484,7 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                     <fieldset id="radio-rating">
                                         {section.options.map(({id, label, value, count}) => (
                                             <SfListItem
+
                                                 key={id}
                                                 as="label"
                                                 size="sm"
@@ -424,15 +495,18 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                                                     <SfRadio
                                                         className="flex items-center"
                                                         value={value}
-                                                        checked={rating === value}
-                                                        name="radio-rating"
-                                                        onChange={() => setRating(rating === value ? null : value)}
+                                                        checked={valueselected.climate === value}
+                                                        name="climate"
+
+                                                        onChange={(e) => {
+                                                            handelSelectAttribute(e);
+                                                        }}
                                                     />
                                                 }
                                             >
                                                 {/* TODO: Adjust the styling and remove block elements when/if span wrapper removed from ListItem */}
                                                 <div className="flex flex-wrap items-center">
-{/*
+                                                    {/*
                                                     <SfRating className="-mt-px" value={Number(value)} max={5} size="sm"/>
 */}
                                                     <span className="mx-2 text-base md:text-sm">{label}</span>
@@ -447,17 +521,16 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
                         </Fragment>
                     );
 
+
                 })
             }
-            {/*{filtersData.map((section) => (*/}
-            {/*   */}
-            {/*))}*/}
+
             <div className="flex justify-between">
                 <SfButton variant="secondary" className="w-full mr-3" onClick={handleClearFilters}>
                     Clear all filters
                 </SfButton>
-                <SfButton className="w-full">Show products</SfButton>
+                <SfButton className="w-full" onClick={handelShowProducts}>Show products</SfButton>
             </div>
         </aside>
     );
-}
+};
