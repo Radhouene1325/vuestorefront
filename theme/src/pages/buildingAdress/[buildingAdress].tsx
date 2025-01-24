@@ -17,11 +17,33 @@ import {sdk} from "../../../sdk.config";
 import authenticationuser from "@/utils/authentication";
 import {getCookie} from "cookies-next";
 
+
+import { CloudArrowUpIcon, LockClosedIcon, ServerIcon } from '@heroicons/react/20/solid'
+
+const features = [
+    {
+        name: 'Push to deploy.',
+        description:
+            'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maiores impedit perferendis suscipit eaque, iste dolor cupiditate blanditiis ratione.',
+        icon: CloudArrowUpIcon,
+    },
+    {
+        name: 'SSL certificates.',
+        description: 'Anim aute id magna aliqua ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.',
+        icon: LockClosedIcon,
+    },
+    {
+        name: 'Database backups.',
+        description: 'Ac tincidunt sapien vehicula erat auctor pellentesque rhoncus. Et magna sit morbi lobortis.',
+        icon: ServerIcon,
+    },
+]
+
 // Here you should provide a list of countries you want to support
 // or use an up-to-date country list like: https://www.npmjs.com/package/country-list
 const countries = ['Germany', 'Great Britain', 'Poland', 'United States of America'] as const;
 const states = ['California', 'Florida', 'New York', 'Texas'] as const;
-async function sendData(url: string, { arg }) {
+async function sendData(url: string, { arg }: { arg: unknown }) {
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -37,14 +59,24 @@ async function sendData(url: string, { arg }) {
     return response.json(); // parse JSON response
 }
 
-export default function AddressCustmer({data, customerCart, addresses, shippingMethode}) {
+export default function AddressCustmer({
+    data,
+    customerCart,
+    addresses,
+    shippingMethode,
+}: {
+    data: { countries: typeof countries };
+    customerCart: any;
+    addresses: any;
+    shippingMethode: any;
+}) {
 
     console.log(customerCart)
 console.log(shippingMethode)
-    const Router = useRouter()
+    const Router = useRouter();
 
     ////////////setBillingAddressOnCar    createCustomerAddress/////
-
+// console.log(Object.keys(customerCart.data.customerCart.billing_address).length)
     const useCombinedMutations = () => {
         const {trigger: setBillingAddress, data: billing, isMutating: isSettingBillingAddress} = useSWRMutation(
             `${BASEURL}/api/setBillingAddressOnCart/setBillingAddressOnCart`,
@@ -113,7 +145,7 @@ console.log(shippingMethode)
         // or JSON object
         const formJSON = Object.fromEntries(formData.entries());
         console.log(formJSON);
-        let infoRegion = region?.data?.available_regions.filter((region) => {
+        let infoRegion = region?.data?.available_regions.filter((region: { id: FormDataEntryValue; }) => {
             return region.id == formJSON.city
         });
         console.log(infoRegion)
@@ -141,7 +173,7 @@ console.log(shippingMethode)
     useMemo(() => {
         if (billing && createAdress) {
             // Router.push(`/shippingAdress/shippingAdress`)
-            Router.push(`/buildingAdress/verifyBuildingAdress/verifyBuildingAdress`)
+            Router.push(`/chekout/chekout`)
         }
     }, [billing,createAdress]);
 
@@ -163,7 +195,7 @@ console.log(shippingMethode)
         console.log(event.target.value)
         setCheckedState(event.target.value);
 
-        let res=shippingMethode.filter(e=>e.carrier_code==event.target.value)
+        let res=shippingMethode.filter((e: { carrier_code: string; })=>e.carrier_code==event.target.value)
         if (res) {
             await getShippingMethode(res[0]);
         }
@@ -179,287 +211,321 @@ console.log(shippingMethode)
     //     }
     //
     // },[checkedState])
+   const [adressIsSelected,setAdressIsSelected]=useState<Record<string,any>> ({})
+    const selectAdress = (id: number) => {
 
+        console.log(id)
+        let addressSelect= addresses?.addresses?.filter((address: { id: any; })=>address.id==id)
+        console.log(addressSelect)
+        setAdressIsSelected(addressSelect[0])
+    };
     return (
 
         <>
-            <div className="flex justify-center py-10 bg-neutral-100 min-h-screen">
-                {/* Form wrapper */}
-                <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
-                    <div className="mb-6">
-                        <h2 className="text-2xl font-bold mb-1">Billing Address</h2>
-                        <p className="text-sm text-neutral-600">
-                            Please provide your billing details below.
-                        </p>
-                    </div>
 
-                    <form
-                        onSubmit={onSubmit}
-                        className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6 text-neutral-900"
-                    >
-                        {/* First Name */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">First Name</span>
-                            <SfInput
-                                name="firstname"
-                                autoComplete="given-name"
-                                required
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent placeholder-neutral-400"
-                            />
-                        </label>
+            <div className="overflow-hidden bg-white  sm:py-24 ">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8 pt-10">
+                    <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+                        {/* Left column */}
 
-                        {/* Last Name */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">Last Name</span>
-                            <SfInput
-                                name="lastname"
-                                autoComplete="family-name"
-                                required
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent placeholder-neutral-400"
-                            />
-                        </label>
+                        <div className="lg:pt-4 lg:pr-8">
+                            <div className="lg:max-w-lg">
+                                {/* Features list */}
+                                <dl className="mt-8 max-w-xl space-y-6 text-base leading-7 text-gray-700 lg:max-w-none">
+                                    <dd className="inline">
+                                        <form
+                                            className="p-4 flex gap-4 flex-wrap text-neutral-900 bg-white border border-gray-200 rounded-md shadow-sm"
+                                            onSubmit={onSubmit}
+                                        >
+                                            <h2 className="w-full text-lg md:text-xl font-bold">
+                                                Billing address
+                                            </h2>
 
-                        {/* Phone */}
-                        <label className="flex flex-col gap-1 col-span-full">
-                            <span className="typography-text-sm font-medium">Phone</span>
-                            <SfInput
-                                name="telephone"
-                                type="tel"
-                                autoComplete="tel"
-                                required
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent placeholder-neutral-400"
-                            />
-                        </label>
+                                            {/* First Name */}
+                                            <label className="w-full md:w-auto flex-grow flex flex-col gap-1 mt-4 md:mt-0">
+                <span className="text-sm font-medium text-gray-800">
+                  First Name
+                </span>
+                                                <input
+                                                    type="text"
+                                                    name="firstname"
+                                                    defaultValue={adressIsSelected?.firstname || ''}
+                                                    autoComplete="given-name"
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                                />
+                                            </label>
 
-                        {/* Country */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">Country</span>
-                            <SfSelect
-                                name="country"
-                                placeholder="-- Select --"
-                                autoComplete="country-name"
-                                required
-                                onChange={handleSelect}
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent text-neutral-900 placeholder-neutral-400"
-                            >
-                                {countries.map((countryName) => (
-                                    <option key={countryName.id} value={countryName.id}>
-                                        {countryName.full_name_english}
-                                    </option>
-                                ))}
-                            </SfSelect>
-                        </label>
+                                            {/* Last Name */}
+                                            <label className="w-full md:w-auto flex-grow flex flex-col gap-1">
+                <span className="text-sm font-medium text-gray-800">
+                  Last Name
+                </span>
+                                                <input
+                                                    type="text"
+                                                    name="lastname"
+                                                    defaultValue={adressIsSelected?.lastname || ''}
+                                                    autoComplete="family-name"
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                                />
+                                            </label>
 
-                        {/* City */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">City</span>
-                            <SfSelect
-                                name="city"
-                                placeholder="-- Select --"
-                                autoComplete="address-level2"
-                                required
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent text-neutral-900 placeholder-neutral-400"
-                            >
-                                {region?.data?.available_regions?.map((region) => (
-                                    <option key={region.id} value={region.id}>
-                                        {region.name}
-                                    </option>
-                                ))}
-                            </SfSelect>
-                        </label>
+                                            {/* Phone */}
+                                            <label className="w-full flex flex-col gap-1">
+                                                <span className="text-sm font-medium text-gray-800">Phone</span>
+                                                <input
+                                                    type="tel"
+                                                    name="telephone"
+                                                    defaultValue={adressIsSelected?.telephone || ''}
+                                                    autoComplete="tel"
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                                />
+                                            </label>
 
-                        {/* Street */}
-                        <label className="flex flex-col gap-1 col-span-full">
-                            <span className="typography-text-sm font-medium">Street</span>
-                            <SfInput
-                                name="street"
-                                autoComplete="address-line1"
-                                onBlur={validateStreet}
-                                onChange={validateStreet}
-                                required
-                                invalid={!streetIsValid}
-                                className={`border rounded-md px-3 py-2 
-                     focus:outline-none focus:ring-2 
-                     ${
-                                    streetIsValid
-                                        ? 'border-neutral-300 focus:ring-blue-500 focus:border-transparent'
-                                        : 'border-negative-400 focus:ring-negative-500 focus:border-transparent'
-                                }
-                     placeholder-neutral-400`}
-                            />
-                            {!streetIsValid && (
-                                <strong className="typography-error-sm text-negative-700 font-medium mt-1">
-                                    Please provide a valid street name
-                                </strong>
-                            )}
-                            <small className="typography-hint-xs text-neutral-500 mt-1">
-                                Street address or P.O. Box
-                            </small>
-                        </label>
+                                            {/* Country + City */}
+                                            <div className="w-full flex flex-col gap-1">
+                                                <label className="text-sm font-medium text-gray-800">
+                                                    Country
+                                                </label>
+                                                <select
+                                                    name="country"
+                                                    onChange={handleSelect}
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                >
+                                                    <option value="">-- Select --</option>
+                                                    {countries.map((countryName) => (
+                                                        <option key={countryName.id} value={countryName.id}>
+                                                            {countryName.full_name_english}
+                                                        </option>
+                                                    ))}
+                                                </select>
 
-                        {/* Apt Number */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">Apt#, Suite, etc</span>
-                            <SfInput
-                                name="aptNo"
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent placeholder-neutral-400"
-                            />
-                            <small className="typography-hint-xs text-neutral-500 mt-1">Optional</small>
-                        </label>
+                                                {/* City */}
+                                                <label className="mt-3 text-sm font-medium text-gray-800">
+                                                    City
+                                                </label>
+                                                <select
+                                                    name="city"
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                >
+                                                    <option value="">-- Select --</option>
+                                                    {region?.data?.available_regions?.map((r) => (
+                                                        <option key={r.id} value={r.id}>
+                                                            {r.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
 
-                        {/* State */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">State</span>
-                            <SfSelect
-                                name="state"
-                                placeholder="-- Select --"
-                                autoComplete="address-level1"
-                                required
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent text-neutral-900 placeholder-neutral-400"
-                            >
-                                {states.map((stateName) => (
-                                    <option key={stateName}>{stateName}</option>
-                                ))}
-                            </SfSelect>
-                        </label>
+                                            {/* Street */}
+                                            <div className="w-full md:w-auto flex-grow flex flex-col gap-1">
+                                                <label className="text-sm font-medium text-gray-800">
+                                                    Street
+                                                </label>
+                                                <input
+                                                    name="street"
+                                                    defaultValue={adressIsSelected?.street || ''}
+                                                    autoComplete="address-line1"
+                                                    onBlur={validateStreet}
+                                                    onChange={validateStreet}
+                                                    required
+                                                    className={`mt-1 rounded-md border px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500 ${
+                                                        streetIsValid
+                                                            ? 'border-gray-300 text-gray-900 placeholder-gray-400'
+                                                            : 'border-red-500 text-red-900 placeholder-red-300'
+                                                    }`}
+                                                />
+                                                {/* Validation messages */}
+                                                {!streetIsValid && (
+                                                    <strong className="text-sm font-medium text-red-700 mt-1">
+                                                        Please provide a street name
+                                                    </strong>
+                                                )}
+                                                <small className="text-xs text-gray-500">
+                                                    Street address or P.O. Box
+                                                </small>
+                                            </div>
 
-                        {/* ZIP Code */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">ZIP Code</span>
-                            <SfInput
-                                name="zipCode"
-                                placeholder="e.g., 12345"
-                                autoComplete="postal-code"
-                                required
-                                className="border border-neutral-300 rounded-md px-3 py-2
-                     focus:outline-none focus:ring-2 focus:ring-blue-500
-                     focus:border-transparent placeholder-neutral-400"
-                            />
-                        </label>
+                                            {/* Apt #, Suite, etc */}
+                                            <div className="w-full md:w-[120px] flex flex-col gap-1">
+                                                <label className="text-sm font-medium text-gray-800">
+                                                    Apt#, Suite, etc
+                                                </label>
+                                                <input
+                                                    name="aptNo"
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                                />
+                                                <small className="text-xs text-gray-500">Optional</small>
+                                            </div>
 
-                        {/* Use as Shipping Address */}
-                        <label className="flex items-center gap-2 col-span-full mt-2">
-                            <SfCheckbox name="useAsShippingAddress"/>
-                            Use as shipping address
-                        </label>
+                                            {/* State */}
+                                            <label className="w-full md:w-auto flex-grow flex flex-col gap-1">
+                                                <span className="text-sm font-medium text-gray-800">State</span>
+                                                <select
+                                                    name="state"
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                >
+                                                    <option value="">-- Select --</option>
+                                                    {states.map((stateName) => (
+                                                        <option key={stateName}>{stateName}</option>
+                                                    ))}
+                                                </select>
+                                            </label>
 
+                                            {/* ZIP Code */}
+                                            <label className="w-full md:w-[120px] flex flex-col gap-1">
+                <span className="text-sm font-medium text-gray-800">
+                  ZIP Code
+                </span>
+                                                <input
+                                                    name="zipCode"
+                                                    placeholder="e.g., 12345"
+                                                    defaultValue={adressIsSelected?.postcode || ''}
+                                                    autoComplete="postal-code"
+                                                    required
+                                                    className="mt-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                                />
+                                            </label>
 
-                        <div className="col-span-full">
+                                            {/* Shipping method */}
+                                            <div className="col-span-full w-full mt-4">
+                                                <p className="mb-2 text-sm font-medium text-gray-800">
+                                                    Shipping Method
+                                                </p>
+                                                <div className="flex flex-col gap-2">
+                                                    {shippingMethode?.map((method) => (
+                                                        <label
+                                                            key={method.carrier_code}
+                                                            className="flex items-start gap-2 p-3 border border-gray-200 rounded-md hover:shadow-sm transition-shadow"
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name="delivery-options"
+                                                                value={method.carrier_code}
+                                                                checked={checkedState === method.carrier_code}
+                                                                onChange={handelSelectMethodeShipping}
+                                                                className="h-4 w-4 mt-1 text-indigo-600 border-gray-300 focus:ring-indigo-500"
+                                                            />
+                                                            <div className="flex flex-col text-sm text-gray-700">
+                                                                <span className="font-medium">{method.method_title}</span>
+                                                                <span>
+                          {method.price_excl_tax.currency}
+                                                                    {method.price_excl_tax.value} &nbsp;EURO
+                        </span>
+                                                            </div>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                                {mutating && (
+                                                    <div className="mt-2 text-sm text-gray-500 flex items-center gap-2">
+                                                        <svg
+                                                            className="h-5 w-5 animate-spin text-cyan-700"
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <circle
+                                                                className="opacity-25"
+                                                                cx="12"
+                                                                cy="12"
+                                                                r="10"
+                                                                stroke="currentColor"
+                                                                strokeWidth="4"
+                                                            />
+                                                            <path
+                                                                className="opacity-75"
+                                                                fill="currentColor"
+                                                                d="M4 12a8 8 0 0 1 8-8v8z"
+                                                            />
+                                                        </svg>
+                                                        <span>Updating shipping method...</span>
+                                                    </div>
+                                                )}
+                                            </div>
 
-                            {shippingMethode?.map(
-                                ({
-                                     amount,
-                                     carrier_code,
-                                     method_title,
-                                     price_excl_tax,
-                                 }) => (
-                                    <SfListItem
-                                        as="label"
-                                        key={carrier_code}
-                                        slotPrefix={
-                                            <SfRadio
-                                                name="delivery-options"
-                                                value={carrier_code}
-                                                checked={checkedState === carrier_code}
-                                                onChange={handelSelectMethodeShipping}
-                                            />
-                                        }
-                                        slotSuffix={
-                                            <span className="text-gray-900">
-                                           <span>{price_excl_tax.currency}</span>
-                                                {price_excl_tax.value}{' '}
-
-                                                EURO
-                                               </span>
-                                        }
-                                        className="!items-start max-w-sm border rounded-md border-neutral-200 first-of-type:mr-4 first-of-type:mb-4"
-                                    >
-                                        {method_title}
-                                    </SfListItem>
-                                )
-                            )}
-                            {mutating && <div className="flex gap-4 flex-wrap">
-                                <SfLoaderCircular className="!text-cyan-700" size="2xl"/>
-
-                            </div>}
+                                            {/* Action buttons */}
+                                            <div className="w-full flex gap-4 mt-6 md:justify-end">
+                                                <button
+                                                    type="reset"
+                                                    className="w-full md:w-auto inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                                >
+                                                    Clear all
+                                                </button>
+                                                <button
+                                                    type="submit"
+                                                    className="w-full md:w-auto inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                                >
+                                                    Save
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </dd>
+                                </dl>
+                            </div>
                         </div>
+                        {/* Right column: screenshot or image */}
+                        <div className="flex items-center justify-center py-8">
+                            <div className="w-full max-w-4xl flex flex-col gap-8 px-4">
+                                <h2 className="text-xl font-bold tracking-tight text-gray-900">
+                                    Shipping Address
+                                </h2>
 
+                                {/* Scrollable container */}
+                                <div className="max-h-[830px] overflow-y-auto">
+                                    {/* Two-column grid on >= sm screens; single column on mobile */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        {addresses?.addresses?.map((address) => (
+                                            <div
+                                                key={address.id}
+                                                className="relative flex flex-col rounded-md border border-gray-200 bg-white p-4 shadow-sm transition-shadow duration-300 hover:shadow-md"
+                                            >
+                                                <h3 className="mb-2 text-base font-medium text-gray-700">
+                                                    Customer Information
+                                                </h3>
 
-                        {/* Buttons */}
-                        <div className="flex gap-4 col-span-full justify-end mt-4">
-                            <SfButton type="reset" variant="secondary">
-                                Clear All
-                            </SfButton>
-                            <SfButton type="submit" disabled={!shippingData}>Save</SfButton>
-                        </div>
-                    </form>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>Nome:</strong> {address.firstname || 'N/A'}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>Cognome:</strong> {address.lastname || 'N/A'}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>Telefono:</strong> {address.telephone || 'N/A'}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>Country Code:</strong>{' '}
+                                                    {address.country_code || 'N/A'}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>Region:</strong>{' '}
+                                                    {address.region?.region || 'N/A'}
+                                                </p>
+                                                <p className="text-sm text-gray-600">
+                                                    <strong>Street:</strong>{' '}
+                                                    {address.postcode || 'N/A'}, {address.street?.[0] || 'N/A'}
+                                                </p>
 
-
-                </div>
-                <div className="w-50 md:w-90 flex flex-col gap-8">
-                    <h2 className="text-lg font-bold">Shipping Address</h2>
-
-                    {/* Scrollable container */}
-                    <div className="max-h-[830px] overflow-y-auto">
-
-                        <div>
-                            {addresses?.addresses?.map((address) => (
-                                <div
-                                    key={address.id}
-                                    className="flex flex-col min-w-[325px] max-w-full lg:w-40 relative border border-neutral-200 rounded-md shadow-md hover:shadow-lg transition-shadow duration-300 p-4"
-                                >
-                                    <h3 className="font-medium typography-text-base mb-2">
-                                        Customer Information
-                                    </h3>
-                                    <p className="text-sm">
-                                        <strong>Nome:</strong> {address.firstname || 'N/A'}
-                                    </p>
-                                    <p className="text-sm">
-                                        <strong>Cognome:</strong> {address.lastname || 'N/A'}
-                                    </p>
-                                    <p className="text-sm">
-                                        <strong>Telefono:</strong> {address.telephone || 'N/A'}
-                                    </p>
-                                    <p className="text-sm">
-                                        <strong>Country Code:</strong> {address.country_code || 'N/A'}
-                                    </p>
-                                    <p className="text-sm">
-                                        <strong>Region:</strong> {address.region?.region || 'N/A'}
-                                    </p>
-                                    <p className="text-sm">
-                                        <strong>street:</strong> {address.postcode || 'N/A'},{address.street[0] || 'N/A'},
-                                    </p>
-                                    <SfButton size="sm" variant="tertiary" className="mt-4" onClick={() => {
-                                        handleSelect(address.id)
-                                    }}>
-                                        Select
-                                    </SfButton>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => selectAdress(address.id)}
+                                                    className="mt-4 inline-flex items-center justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+                                                >
+                                                    Select
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-
-
-
-
-
         </>
 
 
@@ -523,7 +589,12 @@ const cartId=await getCookie('cart-id', {req, res});
             data,
             customerCart,
             addresses,
-            shippingMethode: result?.data?.customerCart?.shipping_addresses[0]?.available_shipping_methods,
+            shippingMethode: result?.data?.customerCart?.shipping_addresses?.[0]?.available_shipping_methods || [],
         },
     };
 };
+
+
+
+
+

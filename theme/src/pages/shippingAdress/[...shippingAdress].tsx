@@ -6,9 +6,9 @@ import {
     SfListItem,
     SfRadio,
     SfIconCheckCircle,
-    SfIconClose
+    SfIconClose, SfLoaderCircular
 } from '@storefront-ui/react';
-import React, {FormEventHandler, ChangeEvent, FocusEvent, useState, FormEvent, useMemo} from 'react';
+import React, {FormEventHandler, ChangeEvent, FocusEvent, useState, FormEvent, useMemo, useEffect} from 'react';
 import {GetServerSideProps} from "next";
 import fetchHomePage from "@/utils/fetchHomePage";
 import useSWRMutation from "swr/mutation";
@@ -22,6 +22,7 @@ import {Pagination} from "@/components/categories/pagination/Pagination";
 // Here you should provide a list of countries you want to support
 // or use an up-to-date country list like: https://www.npmjs.com/package/country-list
 const states = ['California', 'Florida', 'New York', 'Texas'] as const;
+
 async function sendData(url: string, { arg }) {
     const response = await fetch(url, {
         method: 'POST',
@@ -50,7 +51,10 @@ export default function AddressCustmer({data, customerCart,addresses}) {
         `${BASEURL}/api/setShippingAddressesOnCart/setShippingAddressesOnCart`,
         sendData
     );
-
+    const {trigger: setBillingAddres, data: billing, isMutating: isSettingBillingAddres} = useSWRMutation(
+        `${BASEURL}/api/setBillingAddressOnCart/setBillingAddressOnCart`,
+        sendData
+    );
     /////////////////setBillingAddressOnCar/////////////
 
     const {countries} = data as const
@@ -74,7 +78,7 @@ export default function AddressCustmer({data, customerCart,addresses}) {
 
     const [streetIsValid, setStreetIsValid] = useState(true);
 
-
+const [billingAddress, setBillingAddress] = useState<Record<string, any>> ({})
 
 
     const validateStreet = (e: ChangeEvent<HTMLInputElement> | FocusEvent<HTMLInputElement>) => {
@@ -91,7 +95,7 @@ export default function AddressCustmer({data, customerCart,addresses}) {
         // or JSON object
         const formJSON = Object.fromEntries(formData.entries());
         console.log(formJSON);
-        let infoRegion = region?.data?.available_regions.filter((region) => {
+        let infoRegion = region?.data?.available_regions.filter((region: { id: FormDataEntryValue; }) => {
             return region.id ==formJSON.city
         });
         console.log(infoRegion)
@@ -103,7 +107,13 @@ export default function AddressCustmer({data, customerCart,addresses}) {
                 return ".....we are not able to process your request. Please try again later"
             }
             try {
+                setBillingAddress({formJSON, infoRegion})
                 await trigger({formJSON, infoRegion}); // POST { name, email } to /api/send-data
+
+                if(formJSON?.useAsShippingAddress){
+                    await setBillingAddres({formJSON, infoRegion});
+                }
+
             } catch (err) {
                 console.error('Error sending data:', err);
             }
@@ -112,12 +122,22 @@ export default function AddressCustmer({data, customerCart,addresses}) {
 
     };
 
+
+    console.log(billing?.data?.data?.setBillingAddressOnCart?.cart?.billing_address)
+    console.log(adress)
+
     // let adressUser = adress?.data.data.createCustomerAddress
-    useMemo(() => {
+    useMemo(async () => {
         if (adress) {
-            Router.push(`/buildingAdress/buildingAdress`)
+            // if(billing?.data?.data?.setBillingAddressOnCart?.cart?.billing_address === undefined){
+            // }else {
+            //     await Router.push(`/chekout/chekout`)
+            // }
+
+                await Router.push(`/buildingAdress/buildingAdress`)
+            // await Router.push(billing?.data?.data?.setBillingAddressOnCart?.cart?.billing_address === undefined ? `/buildingAdress/buildingAdress` : `/buildingAdress/verifyBuildingAdress/verifyBuildingAdress`);
         }
-    }, [adress]);
+    }, [adress,billing]);
 
 
     console.log(streetIsValid)
@@ -132,152 +152,243 @@ export default function AddressCustmer({data, customerCart,addresses}) {
     //     // }
     // };
 
+    const [checkedState, setCheckedState] = useState(false);
+
+console.log(checkedState)
+    //
+    // useMemo(async () => {
+    //     console.log(billingAddress);
+    //
+    //     if (checkedState) {
+    //         console.log("Use billing address as shipping address add")
+    //                 await setBillingAddres(billingAddress)
+    //     } else {
+    //         console.log("Use billing address as shipping address remove")
+    //     }
+    //
+    // }, [checkedState]);
+    // console.log(billing);
 
 
     return (
-        <div className="container mx-auto p-8">
+        <div className="container mx-auto ">
             {/* Main Flexbox Layout */}
-            <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex flex-col lg:flex-row gap-8 pt-40">
                 {/* Left Column: Billing Form */}
-                <div className="flex-1">
-                    <form
-                        className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6 bg-white p-6 rounded-md shadow-md"
-                        onSubmit={onSubmit}
 
-                    >
-                        <h2 className="col-span-full typography-headline-4 md:typography-headline-3 font-bold">
-                          Create New  Shipping Address
-                        </h2>
-
-                        {/* First Name */}
-                        <label className="flex flex-col gap-1" >
-                            <span className="typography-text-sm font-medium">First Name</span>
-                            <SfInput name="firstname" autoComplete="given-name" required  disabled={isMutating}/>
-
-                        </label>
-
-                        {/* Last Name */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">Last Name</span>
-                            <SfInput name="lastname" autoComplete="family-name" required disabled={isMutating}/>
-                        </label>
-
-                        {/* Phone */}
-                        <label className="flex flex-col gap-1 col-span-full">
-                            <span className="typography-text-sm font-medium">Phone</span>
-                            <SfInput name="telephone" type="tel" autoComplete="tel" required disabled={isMutating}/>
-                        </label>
-
-                        {/* Country */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">Country</span>
-                            <SfSelect
-                                name="country"
-                                placeholder="-- Select --"
-                                autoComplete="country-name"
-                                required
-                                onChange={handleSelect}
-                                disabled={isMutating}
+                <div className="container mx-auto p-8">
+                    {/* Main Flexbox Layout */}
+                    <div className="flex flex-col gap-8 lg:flex-row">
+                        {/* Left Column: Billing Form */}
+                        <div className="flex-1">
+                            <form
+                                className="grid grid-cols-1 gap-4 bg-white p-6 rounded-md shadow-md lg:grid-cols-2 lg:gap-6"
+                                onSubmit={onSubmit}
                             >
-                                {countries.map((countryName:any) => (
-                                    <option key={countryName.id} value={countryName.id}>
-                                        {countryName.full_name_english}
-                                    </option>
-                                ))}
-                            </SfSelect>
-                        </label>
+                                <h2 className="col-span-full text-lg font-bold md:text-xl">
+                                    Create New Shipping Address
+                                </h2>
 
-                        {/* City */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">City</span>
-                            <SfSelect
-                                name="city"
-                                placeholder="-- Select --"
-                                autoComplete="address-level2"
-                                required
-                                disabled={isMutating}
-                            >
-                                {region?.data?.available_regions?.map((region: { id: React.Key | readonly string[] | null | undefined; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => (
-                                    <option key={region.id} value={region.id}>
-                                        {region.name}
-                                    </option>
-                                ))}
-                            </SfSelect>
-                        </label>
+                                {/* First Name */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">First Name</span>
+                                    <input
+                                        type="text"
+                                        name="firstname"
+                                        autoComplete="given-name"
+                                        required
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm
+                  placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                </label>
 
-                        {/* Street */}
-                        <label className="flex flex-col gap-1 col-span-full">
-                            <span className="typography-text-sm font-medium">Street</span>
-                            <SfInput
-                                name="street"
-                                autoComplete="address-line1"
-                                onBlur={validateStreet}
-                                onChange={validateStreet}
-                                required
-                                invalid={!streetIsValid}
-                                disabled={isMutating}
-                            />
-                            {!streetIsValid && (
-                                <strong className="typography-error-sm text-negative-700 font-medium">
-                                    Please provide a valid street name
-                                </strong>
-                            )}
-                            <small className="typography-hint-xs text-neutral-500 mt-1">
-                                Street address or P.O. Box
-                            </small>
-                        </label>
+                                {/* Last Name */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">Last Name</span>
+                                    <input
+                                        type="text"
+                                        name="lastname"
+                                        autoComplete="family-name"
+                                        required
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm
+                  placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                </label>
 
-                        {/* Apt Number */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">Apt#, Suite, etc</span>
-                            <SfInput name="aptNo" disabled={isMutating}/>
-                            <small className="typography-hint-xs text-neutral-500 mt-1">
-                                Optional
-                            </small>
-                        </label>
+                                {/* Phone */}
+                                <label className="col-span-full flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">Phone</span>
+                                    <input
+                                        type="tel"
+                                        name="telephone"
+                                        autoComplete="tel"
+                                        required
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm
+                  placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                </label>
 
-                        {/* State */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium">State</span>
-                            <SfSelect name="state" placeholder="-- Select --" required disabled={isMutating}>
-                                {states.map((stateName) => (
-                                    <option key={stateName}>{stateName}</option>
-                                ))}
-                            </SfSelect>
-                        </label>
+                                {/* Country */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">Country</span>
+                                    <select
+                                        name="country"
+                                        required
+                                        disabled={isMutating}
+                                        onChange={handleSelect}
+                                        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+                  focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        {countries.map((country) => (
+                                            <option key={country.id} value={country.id}>
+                                                {country.full_name_english}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
 
-                        {/* ZIP Code */}
-                        <label className="flex flex-col gap-1">
-                            <span className="typography-text-sm font-medium" disabled={isMutating}>ZIP Code</span>
-                            <SfInput
-                                name="zipCode"
-                                placeholder="e.g., 12345"
-                                autoComplete="postal-code"
-                                required
-                            />
-                        </label>
+                                {/* City */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">City</span>
+                                    <select
+                                        name="city"
+                                        placeholder="-- Select --"
+                                        autoComplete="address-level2"
+                                        required
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+                  focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        {region?.data?.available_regions?.map((region: {
+                                            id: React.Key | readonly string[] | null | undefined;
+                                            name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined;
+                                        }) => (
+                                            <option key={region.id} value={region.id}>
+                                                {region.name}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                        {/* Use as Shipping Address */}
-                        <label className="flex items-center gap-2 col-span-full">
-                            <SfCheckbox name="useAsShippingAddress"/>
-                            Use billing address as shipping address
-                        </label>
 
+                                </label>
 
+                                {/* Street */}
+                                <label className="col-span-full flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">Street</span>
+                                    <input
+                                        type="text"
+                                        name="street"
+                                        autoComplete="address-line1"
+                                        onBlur={validateStreet}
+                                        onChange={validateStreet}
+                                        required
+                                        disabled={isMutating}
+                                        className={`rounded-md border px-3 py-2 text-sm shadow-sm focus:ring-1 focus:ring-indigo-500
+                  placeholder:text-gray-400 
+                  ${
+                                            streetIsValid
+                                                ? 'border-gray-300 text-gray-900 focus:border-indigo-500'
+                                                : 'border-red-500 text-red-900 placeholder-red-300 focus:border-red-500 focus:ring-red-500'
+                                        }
+                `}
+                                    />
+                                    {!streetIsValid && (
+                                        <strong className="text-sm font-medium text-red-700">
+                                            Please provide a valid street name
+                                        </strong>
+                                    )}
+                                    <small className="mt-1 text-xs text-gray-500">
+                                        Street address or P.O. Box
+                                    </small>
+                                </label>
 
-                        {/* Buttons */}
-                        <div className="flex gap-4 col-span-full justify-end">
-                            <SfButton type="reset" variant="secondary">
-                                Clear All
-                            </SfButton>
-                            <SfButton type="submit">Save</SfButton>
+                                {/* Apt Number */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">Apt#, Suite, etc</span>
+                                    <input
+                                        name="aptNo"
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm
+                  placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                    <small className="mt-1 text-xs text-gray-500">Optional</small>
+                                </label>
+
+                                {/* State */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">State</span>
+                                    <select
+                                        name="state"
+                                        required
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm
+                  focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        <option value="">-- Select --</option>
+                                        {states.map((stateName) => (
+                                            <option key={stateName}>{stateName}</option>
+                                        ))}
+                                    </select>
+                                </label>
+
+                                {/* ZIP Code */}
+                                <label className="flex flex-col gap-1">
+                                    <span className="text-sm font-medium text-gray-700">ZIP Code</span>
+                                    <input
+                                        type="text"
+                                        name="zipCode"
+                                        placeholder="e.g., 12345"
+                                        autoComplete="postal-code"
+                                        required
+                                        disabled={isMutating}
+                                        className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 shadow-sm
+                  placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500"
+                                    />
+                                </label>
+
+                                {/* Use as Shipping Address */}
+                                <label className="col-span-full flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        name="useAsShippingAddress"
+                                        checked={checkedState}
+                                        onChange={() => setCheckedState(!checkedState)}
+                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                    />
+                                    <span className="text-sm text-gray-700">
+                Use billing address as shipping address
+              </span>
+                                </label>
+
+                                {/* Buttons */}
+                                <div className="col-span-full flex justify-end gap-4">
+                                    <button
+                                        type="reset"
+                                        disabled={isMutating}
+                                        className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium
+                  text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    >
+                                        Clear All
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={isMutating}
+                                        className="inline-flex items-center justify-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium
+                  text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    >
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+
+                        {/* (Right Column can go here if needed) */}
+                    </div>
                 </div>
-
-
-
-
                 {/*<div className="w-50 md:w-90 flex flex-col gap-8">*/}
                 {/*    <h2 className="text-lg font-bold">Shipping Address</h2>*/}
 
@@ -322,6 +433,10 @@ export default function AddressCustmer({data, customerCart,addresses}) {
 
 
             </div>
+
+
+
+
         </div>
 
 
@@ -528,6 +643,73 @@ export default function AddressCustmer({data, customerCart,addresses}) {
     );
 };
 
+
+
+// const Shipppingmethode=({shippingMethode}: { shippingMethode: { amount: number; carrier_code: string; method_title: string; price_excl_tax: { currency: string; value: number } }[] })=>{
+//     const [checkedState, setCheckedState] = useState('');
+//     console.log(checkedState)
+//     const {trigger: getShippingMethode, data: shippingData, error: ErrorShippingMethode,isMutating:mutating} = useSWRMutation(
+//         `${BASEURL}/api/setShippingMethodsOnCart/setShippingMethodsOnCart`,
+//         fetchHomePage.setShippingMethodsOnCart
+//     )
+//
+//
+//     const handelSelectMethodeShipping = async(event: ChangeEvent<HTMLSelectElement>)=>{
+//         console.log(event.target.value)
+//         setCheckedState(event.target.value);
+//
+//         let res=shippingMethode.filter((e: { carrier_code: string; })=>e.carrier_code==event.target.value)
+//         if (res) {
+//             await getShippingMethode(res[0]);
+//         }
+//
+//     }
+//
+//     return(
+//         <div className="col-span-full">
+//               <>hello</>
+//             {shippingMethode?.map(
+//                 ({
+//                      amount,
+//                      carrier_code,
+//                      method_title,
+//                      price_excl_tax,
+//                  }) => (
+//                     <SfListItem
+//                         as="label"
+//                         key={carrier_code}
+//                         slotPrefix={
+//                             <SfRadio
+//                                 name="delivery-options"
+//                                 value={carrier_code}
+//                                 checked={checkedState === carrier_code}
+//                                 onChange={(event: ChangeEvent<HTMLInputElement>) => handelSelectMethodeShipping(event as unknown as ChangeEvent<HTMLSelectElement>)}
+//                             />
+//                         }
+//                         slotSuffix={
+//                             <span className="text-gray-900">
+//                                            <span>{price_excl_tax.currency}</span>
+//                                 {price_excl_tax.value}{' '}
+//
+//                                 EURO
+//                                                </span>
+//                         }
+//                         className="!items-start max-w-sm border rounded-md border-neutral-200 first-of-type:mr-4 first-of-type:mb-4"
+//                     >
+//                         {method_title}
+//                     </SfListItem>
+//                 )
+//             )}
+//             {mutating && <div className="flex gap-4 flex-wrap">
+//                 <SfLoaderCircular className="!text-cyan-700" size="2xl"/>
+//
+//             </div>}
+//         </div>
+//         )
+//
+// }
+//
+
 export const getServerSideProps: GetServerSideProps = async (context: any, ...rest: any) => {
     const {req, res} = context
 
@@ -593,6 +775,8 @@ export const getServerSideProps: GetServerSideProps = async (context: any, ...re
             customerCart,
             // shippingMethode: result?.data?.customerCart?.shipping_addresses[0]?.available_shipping_methods,
             addresses,
+            shippingMethode: result?.data?.customerCart?.shipping_addresses?.[0]?.available_shipping_methods || [],
+
         },
     };
 };

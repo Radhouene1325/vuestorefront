@@ -16,14 +16,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <div className="flex">
+        <div className="flex pt-20">
             {/* Sidebar */}
             <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
 
             {/* Optional Overlay for mobile when sidebar is open */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-black opacity-50 z-40 md:hidden"
+                    className="absolute inset-0 bg-black opacity-50 z-40 md:hidden"
                     onClick={closeSidebar}
                     aria-hidden="true"
                 ></div>
@@ -48,7 +48,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </header>
 
                 {/* Page Content */}
-                <main className="p-4">{children}</main>
+                <main className="pt-30">{children}</main>
 
                 {/* Floating Open Sidebar Button (visible when sidebar is closed) */}
                 {!isSidebarOpen && (

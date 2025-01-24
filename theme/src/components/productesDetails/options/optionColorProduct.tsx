@@ -1,7 +1,8 @@
-import { SfAccordionItem, SfCounter, SfListItem, SfThumbnail, SfIconChevronLeft } from '@storefront-ui/react';
-import { useState } from 'react';
+import {SfAccordionItem, SfCounter, SfListItem, SfThumbnail, SfIconChevronLeft} from '@storefront-ui/react';
+import {useState} from 'react';
 import classNames from 'classnames';
 import {originConsoleError} from "next/dist/client/components/globals/intercept-console-error";
+
 type DataType = {
     attribute_code: string;
     attribute_uid: string;
@@ -12,12 +13,32 @@ type DataType = {
     values: any[]; // Adjust 'any' to the actual type of the array items if known
 };
 
-export default function ColorFilter({colorList,setColorList,opened,setOpened,setParamsColor, configurable_options}) {
+interface ColorFilterProps {
+    paramsColor?: string[]
+}
 
-    const data=configurable_options[0]
+export default function ColorFilter({
+                                        colorList,
+                                        setColorList,
+                                        opened,
+                                        setOpened,
+                                        setParamsColor,
+                                        configurable_options,
+                                        paramsColor
+                                    }: {
+                                        colorList: string[];
+                                        setColorList: (value: string[]) => void;
+                                        opened: boolean;
+                                        setOpened: (value: boolean) => void;
+                                        setParamsColor: (value: { uidColor: string }[]) => void;
+                                        configurable_options: DataType[];
+                                        paramsColor?: string[];
+                                    }) {
+
+    const data = configurable_options[0]
     console.log(data)
 
-    const {attribute_code,attribute_uid,label,position,uid,use_default,values}:DataType=data
+    const {attribute_code, attribute_uid, label, position, uid, use_default, values}: DataType = data
 
     // const [colorList, setColorList] = useState<string[]>([]);
     // const [opened, setOpened] = useState(true);
@@ -43,7 +64,7 @@ export default function ColorFilter({colorList,setColorList,opened,setOpened,set
         }
 
     };
-console.log(colorList[0])
+    console.log(colorList[0])
     const isColorSelected = (val: string) => colorList.includes(val);
 
     return (

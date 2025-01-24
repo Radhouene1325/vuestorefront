@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo} from 'react'
 import Pannier from "@/components/panier/panier";
 import {GetServerSideProps} from "next";
-import {AppDispatch, RootState, wrapper} from "@/store";
+import {AppDispatch, makeStore, RootState, wrapper} from "@/store";
 import fetchHomePage from "@/utils/fetchHomePage";
 import {parse} from "cookie";
 import Chekout from "@/components/chekout/chekout";
@@ -33,17 +33,15 @@ export interface Availablepayment {
     __typename:string,
 }
 
-const Prod = ({cart}) => {
-console.log(cart)
-    // console.log(customerCart)
-    console.log(cart)
+const Prod = ({index}) => {
+
     const dispatch = useDispatch();
 
-    useEffect(() => {
-
-        dispatch(cartProducts(cart));
-
-    }, []);
+    // useEffect(() => {
+    //
+    //     dispatch(cartProducts(cart));
+    //
+    // }, []);
 
 
 // const {available_payment_methods}=customerCart.customerCart
@@ -63,14 +61,14 @@ console.log(cart)
     // }: Price = prices
     // const {total_quantity, is_virtual, id, email, billing_address, applied_coupon}: Cart = cart
 
-    let index = useSelector((state: RootState) => state.product?.cartProducts);
-    console.log(index)
+    // let index = useSelector((state: RootState) => state.product?.cartProducts);
+    // console.log(index)
 
 
     return (
         <main>
 
-            <div className="container mx-auto px-4 py-6">
+            <div className="container mx-auto px-4 py-6 pt-40">
                 <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
 
                 <div className="flex flex-col md:flex-row gap-4">
@@ -118,20 +116,24 @@ export default Prod;
 // })
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-
+    const store = makeStore()
     const {req, res} = context;
     const cookies = parse(req.headers.cookie || '');
     const cartId = cookies['cart-id'] as string;
     let token = cookies['auth-token'] as string;
+console.log('ssssssssssssssssssssssss', store)
 
+    const {data: {data: {cart: cart}}} = await fetchHomePage.cartProducts(cartId, token);
+    store.dispatch(cartProducts(cart));
 
-    const {data: {data: {cart: cart}}} = await fetchHomePage.cartProducts(cartId,token);
+    let index = await store.getState().product.cartProducts;
+    console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxx',   index)
 
     // const {data:{data:customerCart}}=await fetchHomePage.getAvailableCustomerPaymentMethods()
 // console.log("dcdcdcdssqswqswcdsc",  customerCart)
     return {
         props: {
-            cart: cart,
+           index
             // customerCart:customerCart,
         }
     }

@@ -26,59 +26,11 @@ localForage.config({
         localForage.LOCALSTORAGE,
     ],
 });
-// const createNoopStorage = () => {
-//     return {
-//         getItem(_key: string) {
-//             return Promise.resolve(null);
-//         },
-//         setItem(_key: string, value: any) {
-//             return Promise.resolve(value);
-//         },
-//         removeItem(_key: string) {
-//             return Promise.resolve();
-//         },
-//     };
-// };
-// const storage =
-//     typeof window !== 'undefined'
-//         ? createWebStorage('local')
-//         : createNoopStorage();
 
-// const persistConfig: PersistConfig<ReturnType<typeof rootReducer>> = {
-//     key: 'root', // key in storage
-//     version: 1,
-//     storage:storage,
-//     // optional: specify which slice(s) to persist, e.g.
-//     whitelist: ['categorie','user'], // only persist the counter slice
-// //   blacklist: ['user'], // don't persist user slice
-// };
-
-// const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-// const makeStore = () =>{
-//   const store=  configureStore({
-//         reducer: persistedReducer,
-//       middleware: (getDefaultMiddleware) =>
-//           getDefaultMiddleware({
-//               serializableCheck: false
-//           }),
-//         // Optionally add devTools, middleware, etc.
-//     });
-//     // (store as any).__persistor = persistStore(store); // `persistStore` returns a Persistor
-//     (store as any).__persistor = null; // Just set to null for now
-//
-//     return store;
-// }
 
 const makeConfiguredStore = (reducer) => {
     if (typeof window !== 'undefined') {
-        // const persistConfig = {
-        //     key: 'root',
-        //     storage,
-        //     // whitelist: ['cart'], // Specify which reducers you want to persist
-        // };
 
-        // const persistedReducer = persistReducer(persistConfig, reducer);
 
         return configureStore({
             reducer: reducer,
@@ -100,7 +52,7 @@ const makeConfiguredStore = (reducer) => {
 };
 
 // Create a makeStore function
-const makeStore = () => makeConfiguredStore(persistReducer);
+export const makeStore = () => makeConfiguredStore(persistReducer);
 
 
 // For TypeScript, define store types

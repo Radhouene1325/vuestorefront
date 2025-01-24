@@ -4,25 +4,25 @@
 @tailwind utilities;
 
 
-.slick-prev,
-.slick-next {
-    z-index: 10;
-    color: #000;
-}
+/*.slick-prev,*/
+/*.slick-next {*/
+/*    z-index: 10;*/
+/*    color: #000;*/
+/*}*/
 
-.slick-dots li button:before {
-    color: #000;
-}
+/*.slick-dots li button:before {*/
+/*    color: #000;*/
+/*}*/
 
-.slick-dots li.slick-active button:before {
-    color: #1f2937; /* Tailwind's gray-800 */
-}
+/*.slick-dots li.slick-active button:before {*/
+/*    color: #1f2937; !* Tailwind's gray-800 *!*/
+/*}*/
 
-.carousel-container {
-    max-width: 100%;
-    margin: 0 auto;
-    overflow: hidden;
-}
-.logo-card {
-    padding: 10px;
-}
+/*.carousel-container {*/
+/*    max-width: 100%;*/
+/*    margin: 0 auto;*/
+/*    overflow: hidden;*/
+/*}*/
+/*.logo-card {*/
+/*    padding: 10px;*/
+/*}*/

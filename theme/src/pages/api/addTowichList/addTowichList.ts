@@ -44,19 +44,19 @@ export interface AddProductToWishListResponse {
             }
         );
 
-        if(response){
-            res.setHeader(
-                'Set-Cookie',
-                serialize('auth-token', '', {
-
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict',
-                    path: '/',
-                    maxAge: 0,
-                })
-            );
-        }
+        // if(response){
+        //     res.setHeader(
+        //         'Set-Cookie',
+        //         serialize('auth-token', '', {
+        //
+        //             httpOnly: true,
+        //             secure: process.env.NODE_ENV === 'production',
+        //             sameSite: 'strict',
+        //             path: '/',
+        //             maxAge: 0,
+        //         })
+        //     );
+        // }
 
         res.status(200).json({ data: response });
     } catch (error) {

@@ -188,7 +188,14 @@ export async function getServerSideProps(context) {
         }
     });
     console.log('helllo admin im her', customer)
-
+    if (!customer?.data?.customer) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        };
+    }
 
     return {
         props: {

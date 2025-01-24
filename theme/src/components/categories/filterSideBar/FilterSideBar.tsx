@@ -1,36 +1,96 @@
 import {
     SfAccordionItem,
     SfButton,
-    SfCounter,
-    SfChip,
-    SfIconClose,
-    SfIconChevronLeft,
-    SfIconArrowBack,
-    SfIconCheck,
-    SfListItem,
-    SfThumbnail,
-    SfRadio,
-    SfRating,
-    SfSelect,
     SfCheckbox,
+    SfChip,
+    SfCounter,
+    SfIconCheck,
+    SfIconChevronLeft,
+    SfIconClose,
+    SfListItem,
+    SfRadio,
+    SfThumbnail,
 } from '@storefront-ui/react';
-import {Fragment, useMemo, useState} from 'react';
+import React, {Fragment, useEffect, useMemo, useState} from 'react';
 import classNames from 'classnames';
 import {Aggregations} from "@/pages/categorie/[...sulg]";
 import useSWRMutation from "swr/mutation";
 import {BASEURL} from "@/BASEURL/URL";
 import fetchHomePage from "@/utils/fetchHomePage";
 import {useRouter} from "next/router";
+import {cartProductsFiltred, deleteFilter} from "@/store/slices/productsSlice";
+import {useDispatch} from "react-redux";
+import {
+    Dialog,
+    DialogBackdrop,
+    DialogPanel,
+    Disclosure,
+    DisclosureButton,
+    DisclosurePanel,
+    Menu, MenuButton, MenuItem, MenuItems
+} from "@headlessui/react";
+import {XMarkIcon} from "@heroicons/react/24/outline";
+import {ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon} from "@heroicons/react/20/solid";
+
+
+
 
 const sortOptions = [
-    {id: 'sort1', label: 'Relevance', value: 'relevance'},
-    {id: 'sort2', label: 'Price: Low to High', value: 'price low to high'},
-    {id: 'sort3', label: 'Price: High to Low', value: 'price high to low'},
-    {id: 'sort4', label: 'New Arrivals', value: 'new arrivals'},
-    {id: 'sort5', label: 'Customer Rating', value: 'customer rating'},
-    {id: 'sort6', label: 'Bestsellers', value: 'bestsellers'},
-];
+    { name: 'Most Popular', href: '#', current: true },
+    { name: 'Best Rating', href: '#', current: false },
+    { name: 'Newest', href: '#', current: false },
+    { name: 'Price: Low to High', href: '#', current: false },
+    { name: 'Price: High to Low', href: '#', current: false },
+]
+const subCategories = [
+    { name: 'Totes', href: '#' },
+    { name: 'Backpacks', href: '#' },
+    { name: 'Travel Bags', href: '#' },
+    { name: 'Hip Bags', href: '#' },
+    { name: 'Laptop Sleeves', href: '#' },
+]
+const filters = [
+    {
+        id: 'color',
+        name: 'Color',
+        options: [
+            { value: 'white', label: 'White', checked: false },
+            { value: 'beige', label: 'Beige', checked: false },
+            { value: 'blue', label: 'Blue', checked: true },
+            { value: 'brown', label: 'Brown', checked: false },
+            { value: 'green', label: 'Green', checked: false },
+            { value: 'purple', label: 'Purple', checked: false },
+        ],
+    },
+    {
+        id: 'category',
+        name: 'Category',
+        options: [
+            { value: 'new-arrivals', label: 'New Arrivals', checked: false },
+            { value: 'sale', label: 'Sale', checked: false },
+            { value: 'travel', label: 'Travel', checked: true },
+            { value: 'organization', label: 'Organization', checked: false },
+            { value: 'accessories', label: 'Accessories', checked: false },
+        ],
+    },
+    {
+        id: 'size',
+        name: 'Size',
+        options: [
+            { value: '2l', label: '2L', checked: false },
+            { value: '6l', label: '6L', checked: false },
+            { value: '12l', label: '12L', checked: false },
+            { value: '18l', label: '18L', checked: false },
+            { value: '20l', label: '20L', checked: false },
+            { value: '40l', label: '40L', checked: true },
+        ],
+    },
+]
 
+
+function classNames(...classes: string[]) {
+    return classes.filter(Boolean).join(' ')
+}
 type FilterDetail = {
     id: string;
     label: string;
@@ -46,155 +106,16 @@ type Node = {
     details: FilterDetail[];
 };
 
-const filtersData: Node[] = [
-    {
-        id: 'acc1',
-        summary: 'Size',
-        type: 'size',
-        details: [
-            {id: 's1', label: '6', value: '6', counter: 10},
-            {id: 's2', label: '6.5', value: '6.5', counter: 10},
-            {id: 's3', label: '7', value: '7.5', counter: 30},
-            {id: 's4', label: '8', value: '8', counter: 0},
-            {id: 's5', label: '8.5', value: '8.5', counter: 3},
-            {id: 's6', label: '9', value: '9', counter: 7},
-            {id: 's7', label: '9.5', value: '9.5', counter: 9},
-            {id: 's8', label: '10', value: '10', counter: 11},
-            {id: 's9', label: '10.5', value: '10.5', counter: 12},
-            {id: 's10', label: '11', value: '11', counter: 0},
-            {id: 's11', label: '11.5', value: '11.5', counter: 4},
-            {id: 's12', label: '12', value: '12', counter: 1},
-        ],
-    },
-    {
-        id: 'acc2',
-        summary: 'Category',
-        type: 'category',
-        details: [
-            {
-                id: 'CLOTHING',
-                label: 'Clothing',
-                value: 'clothing',
-                counter: 30,
-                link: '#',
-            },
-            {
-                id: 'SHOES',
-                label: 'Shoes',
-                value: 'shoes',
-                counter: 28,
-                link: '#',
-            },
-            {
-                id: 'ACCESSORIES',
-                label: 'Accessories',
-                value: 'accessories',
-                counter: 56,
-                link: '#',
-            },
-            {
-                id: 'WEARABLES',
-                label: 'Wearables',
-                value: 'wearables',
-                counter: 12,
-                link: '#',
-            },
-            {
-                id: 'FOOD_DRINKS',
-                label: 'Food & Drinks',
-                value: 'food and drinks',
-                counter: 52,
-                link: '#',
-            },
-        ],
-    },
-    {
-        id: 'acc3',
-        summary: 'Color',
-        type: 'color',
-        details: [
-            {
-                id: 'c1',
-                label: 'Primary',
-                value: 'bg-primary-500',
-                counter: 10,
-            },
-            {
-                id: 'c2',
-                label: 'Black and gray',
-                value: 'bg-[linear-gradient(-45deg,#000_50%,#d1d5db_50%)]',
-                counter: 5,
-            },
-            {
-                id: 'c3',
-                label: 'Violet',
-                value: 'bg-violet-500',
-                counter: 0,
-            },
-            {
-                id: 'c4',
-                label: 'Red',
-                value: 'bg-red-500',
-                counter: 2,
-            },
-            {
-                id: 'c5',
-                label: 'Yellow',
-                value: 'bg-yellow-500',
-                counter: 100,
-            },
-            {
-                id: 'c6',
-                label: 'Avocado',
-                value: 'bg-gradient-to-tr from-yellow-300 to-primary-500',
-                counter: 14,
-            },
-        ],
-    },
-    {
-        id: 'acc4',
-        summary: 'Brand',
-        type: 'checkbox',
-        details: [
-            {id: 'b1', label: 'Conroy', value: 'conroy', counter: 10},
-            {id: 'b2', label: 'Goyette', value: 'goyette', counter: 100},
-            {id: 'b3', label: 'Ledner & Ward', value: 'lednerward', counter: 0},
-            {id: 'b4', label: 'Pacocha', value: 'pacocha', counter: 3},
-        ],
-    },
-    {
-        id: 'acc5',
-        summary: 'Price',
-        type: 'radio',
-        details: [
-            {id: 'pr1', label: 'Under $24.99', value: 'under', counter: 123},
-            {id: 'pr2', label: '$25.00 - $49.99', value: '25-49', counter: 100},
-            {id: 'pr3', label: '$50.00 - $99.99', value: '50-99', counter: 12},
-            {id: 'pr4', label: '$100.00 - $199.99', value: '100-199', counter: 3},
-            {id: 'pr5', label: '$200.00 and above', value: 'above', counter: 18},
-        ],
-    },
-    {
-        id: 'acc6',
-        summary: 'Rating',
-        type: 'rating',
-        details: [
-            {id: 'r1', label: '5', value: '5', counter: 10},
-            {id: 'r2', label: '4 & up', value: '4', counter: 123},
-            {id: 'r3', label: '3 & up', value: '3', counter: 12},
-            {id: 'r4', label: '2 & up', value: '2', counter: 3},
-            {id: 'r5', label: '1 & up', value: '1', counter: 13},
-        ],
-    },
-];
 
 interface FiltersSideBarProps {
-    aggregations?: Array<Aggregations>
+    aggregations?: Array<Aggregations>,
+    toggleFiltere?: () => void
 }
 
-export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
+const  FiltersSideBar=({aggregations, toggleFiltere}: FiltersSideBarProps) =>{
+    const dispatchEvent = useDispatch();
     const router = useRouter();
-    console.log(router.query);
+    console.log(router);
     const {uid} = router.query;
     console.log(aggregations);
     const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -205,19 +126,12 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
     console.log(price);
     console.log(rating);
 
-    const [valueselected, setValueselected] = useState<Record<string, string>>({});
 
     const isAccordionItemOpen = (attribute_code: string) => opened.includes(attribute_code);
-    const isFilterSelected = (selectedValue: string) => Object.values(valueselected).includes(selectedValue);
-    const handleFilterSelection = (selectedValue: string) => {
-        console.log(selectedValue);
-        if (selectedFilters.indexOf(selectedValue) > -1) {
-            setSelectedFilters([...selectedFilters.filter((value) => value !== selectedValue)]);
 
-        } else {
-            setSelectedFilters([...selectedFilters, selectedValue]);
-        }
-    };
+
+
+
 
     const handleToggle = (attribute_code: string) => (open: boolean) => {
         if (open) {
@@ -228,36 +142,6 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
     };
 
     console.log(opened);
-    const handleClearFilters = () => {
-        // setSelectedFilters([]);
-        // setPrice(null);
-        // setRating(null);
-        setValueselected({})
-    };
-
-
-    const handelSelectAttribute = (e) => {
-        // console.log(attribute_code);
-        // const x = opened.includes(attribute_code);
-        // console.log(x)
-        // if(x) {
-        //
-        //
-        //
-        //     let selected = aggregations?.filter((item) => item.attribute_code === attribute_code);
-        //     console.log(selected);
-        //
-        // }
-
-        setValueselected({
-            ...valueselected,
-            [e.target.name]: e.target.value
-        })
-
-    }
-    console.log(valueselected);
-
-
     const {trigger, data, error, isMutating} = useSWRMutation(
         (arg: string | string[][] | Record<string, string> | URLSearchParams | undefined) => {
             const query = new URLSearchParams(arg).toString();
@@ -268,269 +152,494 @@ export default function FiltersSideBar({aggregations}: FiltersSideBarProps) {
 
         fetchHomePage.filterProducts
     );
-    
 
-    console.log(data);
-    let handelShowProducts = async () => {
-        await trigger({valueselected, uid})
-    }
-
-
-    return (
-        <aside className="w-full md:max-w-[376px]">
-            <div className="flex items-center justify-between mb-4">
-                <button type="button" className="sm:hidden text-neutral-500" aria-label="Close filters panel">
-                    <SfIconClose/>
-                </button>
-            </div>
-            <h5 className="py-2 px-4 mb-6 bg-neutral-100 typography-headline-6 font-bold text-neutral-900 uppercase tracking-widest md:rounded-md">
-                Sort by
-            </h5>
-            <div className="px-2">
-                <SfSelect aria-label="Sorting">
-                    {sortOptions.map((option) => (
-                        <option value={option.value} key={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </SfSelect>
-            </div>
-            <h5 className="py-2 px-4 mt-6 mb-4 bg-neutral-100 typography-headline-6 font-bold text-neutral-900 uppercase tracking-widest md:rounded-md">
-                Filter
-            </h5>
-            {
-                aggregations?.map((section, index) => {
-                    return (
-                        <Fragment key={section.attribute_code}>
-                            <SfAccordionItem
-                                onToggle={handleToggle(section.attribute_code)}
-                                open={isAccordionItemOpen(section.attribute_code)}
-                                // onClick={() => handelSelectAttribute(section.attribute_code)}
-                                summary={
-                                    <div className="flex justify-between p-2 mb-2">
-                                        <p className="mb-2 font-medium typography-headline-5">{section.label}</p>
-                                        <SfIconChevronLeft
-                                            className={classNames(
-                                                'text-neutral-500',
-                                                `${isAccordionItemOpen(section.attribute_code) ? 'rotate-90' : '-rotate-90'}`,
-                                            )}
-                                        />
-                                    </div>
-                                }
-                            >
-                                {section.attribute_code === 'size' && section.label === 'Size' && (
-                                    <ul className="grid grid-cols-5 gap-2">
-                                        {section.options.map(({label, value, count, index}) => (
-                                            <li key={index}>
-                                                <SfChip
-                                                    size="sm"
-
-                                                    className="w-full"
-                                                    inputProps={{
-                                                        value,
-                                                        name: "size",
-                                                        disabled: !count,
-                                                        checked: isFilterSelected(value),
-                                                        onChange: (event) => handelSelectAttribute(event),
-                                                    }}
-                                                >
-                                                    {label}
-                                                </SfChip>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-
-                                {section.attribute_code === 'category_uid' && section.label === 'Category' && (
-                                    <ul className="mt-2 mb-6">
-                                        <li>
-                                            <SfListItem size="sm" as="button" type="button">
-                                             <span className="flex items-center">
-                                              {/*<SfIconArrowBack size="sm" className="text-neutral-500 mr-3"/>*/}
-                                                 Back to {section.options[0].label}
-                                               </span>
-                                            </SfListItem>
-                                        </li>
-                                        {section.options.map(({id, link, label, count, value}, categoryIndex) => (
-                                            <li key={id}>
-                                                <SfListItem
-                                                    size="sm"
-                                                    as="a"
-                                                    name="category"
-                                                    // href={link}
-                                                    value={value}
-                                                    className={classNames('first-of-type:mt-2 rounded-md active:bg-primary-100', {
-                                                        'bg-primary-100 hover:bg-primary-100 font-medium': categoryIndex === 0,
-                                                    })}
-                                                    slotSuffix={categoryIndex === 0 &&
-                                                        <SfIconCheck size="sm" className="text-primary-700"/>}
-                                                    // selected={categoryIndex === 0}
-                                                    onChange={(event) => {
-                                                        handelSelectAttribute(event);
-                                                    }}
-                                                >
-                                                  <span className="flex items-center">
-                                                     {label}
-                                                      <SfCounter
-                                                          className="ml-2 typography-text-sm font-normal">{count}</SfCounter>
-                                                     </span>
-                                                </SfListItem>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                                {section.attribute_code === 'color' && section.label === "Color" &&
-                                    section.options.map(({id, label, value, count}) => (
-                                        <SfListItem
-                                            key={id}
-                                            as="label"
-
-                                            size="sm"
-                                            className={classNames('px-1.5 bg-transparent hover:bg-transparent', {
-                                                'font-medium': isFilterSelected(value),
-                                            })}
-                                            selected={isFilterSelected(value)}
-                                            slotPrefix={
-                                                <>
-                                                    <input
-                                                        value={value}
-                                                        name="color"
-                                                        checked={isFilterSelected(value)}
-                                                        className="appearance-none peer"
-                                                        type="checkbox"
-                                                        onChange={(event) => {
-                                                            handelSelectAttribute(event);
-                                                        }}
-                                                    />
-                                                    <span
-                                                        className="inline-flex items-center justify-center p-1 transition duration-300 rounded-full cursor-pointer ring-1 ring-neutral-200 ring-inset outline-offset-2 outline-secondary-600 peer-checked:ring-2 peer-checked:ring-primary-700 peer-hover:bg-primary-100 peer-[&:not(:checked):hover]:ring-primary-200 peer-active:bg-primary-200 peer-active:ring-primary-300 peer-disabled:cursor-not-allowed peer-disabled:bg-disabled-100 peer-disabled:opacity-50 peer-disabled:ring-1 peer-disabled:ring-disabled-200 peer-disabled:hover:ring-disabled-200 peer-checked:hover:ring-primary-700 peer-checked:active:ring-primary-700 peer-focus-visible:outline">
-                        <SfThumbnail size="sm" style={{backgroundColor: label}}/>
-                      </span>
-                                                </>
-                                            }
-                                        >
-                                            <p>
-                                                <span className="mr-2 text-sm">{label}</span>
-                                                <SfCounter size="sm">{count}</SfCounter>
-                                            </p>
-                                        </SfListItem>
-                                    ))}
-                                {section.attribute_code === "material" && section.label === "Material" &&
-                                    section.options.map(({label, value, count}) => (
-                                        <SfListItem
-                                            key={value}
-                                            as="label"
-                                            size="sm"
-                                            name="material"
-                                            disabled={count === 0}
-                                            className={classNames('px-1.5 bg-transparent hover:bg-transparent', {
-                                                'font-medium': isFilterSelected(value),
-                                            })}
-                                            slotPrefix={
-                                                <SfCheckbox
-                                                    className="flex items-center"
-                                                    disabled={count === 0}
-                                                    name="material"
-                                                    value={value}
-                                                    checked={isFilterSelected(value)}
-                                                    onChange={(event) => {
-                                                        handelSelectAttribute(event);
-                                                    }}
-                                                />
-                                            }
-                                        >
-                                            <p>
-                                                <span className="mr-2 text-sm">{label}</span>
-                                                <SfCounter size="sm">{count}</SfCounter>
-                                            </p>
-                                        </SfListItem>
-                                    ))}
-                                {section.attribute_code === 'price' && section.label === 'Price' && (
-                                    <fieldset name="radio-price">
-                                        {section.options.map(({label, value, count}) => (
-                                            <SfListItem
-                                                key={value}
-                                                as="label"
-                                                name="price"
-                                                size="sm"
-                                                disabled={count === 0}
-                                                className={classNames('px-1.5 bg-transparent hover:bg-transparent', {
-                                                    'font-medium': value === price,
-                                                })}
-                                                slotPrefix={
-                                                    <SfRadio
-                                                        name="price"
-
-                                                        className="flex items-center"
-                                                        disabled={count === 0}
-                                                        value={value}
-                                                        checked={valueselected.price === value}
-
-                                                        onChange={(e) => {
-                                                            handelSelectAttribute(e);
-                                                        }}
-                                                    />
-                                                }
-                                            >
-                                                <p>
-                                                    <span className="mr-2 text-sm">{label}</span>
-                                                    <SfCounter size="sm">{count}</SfCounter>
-                                                </p>
-                                            </SfListItem>
-                                        ))}
-                                    </fieldset>
-                                )}
-                                {section.attribute_code === 'climate' && section.label === 'Climate' && (
-                                    <fieldset id="radio-rating">
-                                        {section.options.map(({id, label, value, count}) => (
-                                            <SfListItem
-
-                                                key={id}
-                                                as="label"
-                                                size="sm"
-                                                className={classNames('!items-center py-4 md:py-1 bg-transparent hover:bg-transparent', {
-                                                    'font-medium': value === rating,
-                                                })}
-                                                slotPrefix={
-                                                    <SfRadio
-                                                        className="flex items-center"
-                                                        value={value}
-                                                        checked={valueselected.climate === value}
-                                                        name="climate"
-
-                                                        onChange={(e) => {
-                                                            handelSelectAttribute(e);
-                                                        }}
-                                                    />
-                                                }
-                                            >
-                                                {/* TODO: Adjust the styling and remove block elements when/if span wrapper removed from ListItem */}
-                                                <div className="flex flex-wrap items-center">
-                                                    {/*
-                                                    <SfRating className="-mt-px" value={Number(value)} max={5} size="sm"/>
-*/}
-                                                    <span className="mx-2 text-base md:text-sm">{label}</span>
-                                                    <SfCounter size="sm">{count}</SfCounter>
-                                                </div>
-                                            </SfListItem>
-                                        ))}
-                                    </fieldset>
-                                )}
-                            </SfAccordionItem>
-                            <hr className="my-4"/>
-                        </Fragment>
-                    );
+    // const handelSelectAttribute =async (e) => {
+    //     // console.log(attribute_code);
+    //     // const x = opened.includes(attribute_code);
+    //     // console.log(x)
+    //     // if(x) {
+    //     //
+    //     //
+    //     //
+    //     //     let selected = aggregations?.filter((item) => item.attribute_code === attribute_code);
+    //     //     console.log(selected);
+    //     //
+    //     // }
+    //
+    //     setValueselected({
+    //         ...valueselected,
+    //         [e.target.name]: e.target.value
+    //     })
+    //
+    //     let index = await trigger({valueselected, uid});
+    //     console.log(index.data.data)
+    //     dispatchEvent(cartProductsFiltred(index?.data.data));
+    //
+    // }
 
 
-                })
+
+    const [valueselected, setValueselected] = useState<Record<string, string[]>>({});
+
+
+    const [selectName, setSelectName] = useState<string>('');
+    console.log(selectName);
+    const isFilterSelected = (selectedValue: React.Key | readonly string[] | null | undefined) => {
+        if (!selectName || !valueselected[selectName]) return false; // Avoid errors
+
+        Object.keys(valueselected).length > 0 ? Object.keys(valueselected[selectName]).includes(selectedValue) : null;
+
+    };
+    const handelSelectAttribute = async (e) => {
+        const { name, value } = e.target; // Extract name and value from event
+        setSelectName(name);
+
+        // setValueselected((prev) => {
+        //     // If the attribute exists and is an array, update it
+        //     if (Array.isArray(prev[name])) {
+        //         // Toggle selection: If value is already present, remove it; otherwise, add it
+        //         const updatedValues = prev[name].includes(value)
+        //             ? prev[name].filter((v) => v !== value) // Remove if exists
+        //             : [...prev[name], value]; // Add new value
+        //
+        //         return {
+        //             ...prev,
+        //             [name]: updatedValues,
+        //         };
+        //     }
+        //
+        //     // If the attribute is not an array, initialize it as an array
+        //     return {
+        //         ...prev,
+        //         [name]: [value],
+        //     };
+        // });
+        setValueselected((prev) => {
+            if (!prev[name]) {
+                return { ...prev, [name]: [value] }; // Initialize if not present
             }
 
-            <div className="flex justify-between">
-                <SfButton variant="secondary" className="w-full mr-3" onClick={handleClearFilters}>
-                    Clear all filters
-                </SfButton>
-                <SfButton className="w-full" onClick={handelShowProducts}>Show products</SfButton>
-            </div>
-        </aside>
+            const updatedValues = prev[name].includes(value)
+                ? prev[name].filter((v) => v !== value) // Remove if exists
+                : [...prev[name], value]; // Add new value
+
+            return { ...prev, [name]: updatedValues };
+        });
+
+    };
+    console.log(valueselected);
+
+
+
+
+
+    console.log(data?.data?.data.products.items);
+    // dispatchEvent(cartProductsFiltred(data?.data?.data));
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (Object.keys(valueselected).length > 0) {
+                let index = await trigger({valueselected, uid});
+                console.log(index.data.data);
+                if(index?.data?.data){
+
+                    dispatchEvent(cartProductsFiltred(index?.data?.data?.products?.items));
+                }
+            }
+        };
+        fetchData();
+    }, [valueselected]);
+    let handelShowProducts = async () => {
+        let index = await trigger({valueselected, uid});
+        console.log(index.data.data)
+        // dispatchEvent(cartProductsFiltred(index?.data.data));
+
+    }
+    // useMemo(() => {
+    //     if (data?.data?.data) {
+    //         dispatchEvent(cartProductsFiltred(data?.data.data));
+    //     }
+    // }, [data?.data?.data])
+
+    useEffect(() => {
+        const handleRouteChange = (url: string) => {
+            console.log(url);
+            console.log(url.startsWith("/categorie")); // Check if it's a category route
+
+            if (router.query.uid !== null) {
+                dispatchEvent(cartProductsFiltred([])); // Dispatch the action
+                setValueselected({}); // Reset filters
+                setSelectName(""); // Reset selected name
+            }
+        };
+
+        // Listen to route change
+        router.events.on("routeChangeComplete", handleRouteChange);
+
+        // Cleanup event listener when component unmounts
+        return () => {
+            router.events.off("routeChangeComplete", handleRouteChange);
+        };
+    }, [router]);
+
+
+
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
+    return (
+        <>
+
+
+
+
+            {/*                    /!* Filters *!/*/}
+                                <form className="hidden lg:block sticky top-[64px] left-0 h-[calc(100vh-64px)] w-72 overflow-y-auto bg-white border-r border-gray-200 px-4 shadow-md">
+                                    <h3 className="sr-only">Categories</h3>
+                                    {/*<ul role="list" className="space-y-4 border-b border-gray-200 pb-6 text-sm font-medium text-gray-900">*/}
+                                    {/*    {subCategories.map((category) => (*/}
+                                    {/*        <li key={category.name}>*/}
+                                    {/*            <a href={category.href}>{category.name}</a>*/}
+                                    {/*        </li>*/}
+                                    {/*    ))}*/}
+                                    {/*</ul>*/}
+
+                                    {aggregations?.map((section) => (
+                                        <Disclosure key={section.id} as="div" className="border-b border-gray-200 py-6">
+                                            <h3 className="-my-3 flow-root">
+                                                <DisclosureButton className="group flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+                                                    <span className="font-medium text-gray-900">{section.label}</span>
+                                                    <span className="ml-6 flex items-center">
+                                                    <PlusIcon aria-hidden="true" className="size-5 group-data-[open]:hidden" />
+                                                  <MinusIcon aria-hidden="true" className="size-5 group-[&:not([data-open])]:hidden" />
+                                                  </span>
+                                                </DisclosureButton>
+                                            </h3>
+                                            <DisclosurePanel className="pt-6">
+                                                <div className="space-y-4">
+                                                    {section.options.map((option: { value: React.Key | readonly string[] | null | undefined; label: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, optionIdx: any) => (
+                                                        <div key={Array.isArray(option.value) ? option.value.join(",") : option.value?.toString()} className="flex gap-3">
+                                                            <div className="flex h-5 shrink-0 items-center">
+                                                                <div className="group grid size-4 grid-cols-1">
+                                                                    <input
+                                                                        defaultValue={Array.isArray(option.value) ? option.value.join(",") : option.value?.toString() ?? ""}
+                                                                        id={`filter-mobile-${section.label}-${optionIdx}`}
+                                                                        name={`${section.attribute_code}`}
+                                                                        type="checkbox"
+                                                                        checked={isFilterSelected(option.value)}
+
+                                                                        onChange={async(e: any) => {
+                                                                            await handelSelectAttribute(e);
+                                                                        }}
+                                                                        className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                                                    />
+                                                                    <svg
+                                                                        fill="none"
+                                                                        viewBox="0 0 14 14"
+                                                                        className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
+                                                                    >
+                                                                        <path
+                                                                            d="M3 8L6 11L11 3.5"
+                                                                            strokeWidth={2}
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            className="opacity-0 group-has-[:checked]:opacity-100"
+                                                                        />
+                                                                        <path
+                                                                            d="M3 7H11"
+                                                                            strokeWidth={2}
+                                                                            strokeLinecap="round"
+                                                                            strokeLinejoin="round"
+                                                                            className="opacity-0 group-has-[:indeterminate]:opacity-100"
+                                                                        />
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            <label htmlFor={`filter-${section.id}-${optionIdx}`} className="text-sm text-gray-600">
+                                                                {option.label}
+                                                            </label>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </DisclosurePanel>
+                                        </Disclosure>
+                                    ))}
+
+
+
+                                </form>
+
+            {/*                    /!* Product grid *!/*/}
+            {/*                    <div className="lg:col-span-3">/!* Your content *!/</div>*/}
+            {/*                </div>*/}
+            {/*            </section>*/}
+            {/*        </main>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
+
+
+        </>
     );
 };
+
+
+export const FilterSideBarMobile = ({ aggregations }: { aggregations: { id: string; label: string; options: { value: string; label: string }[] }[] }) => {
+    const dispatchEvent = useDispatch();
+    const router = useRouter();
+    console.log(router);
+    const {uid} = router.query;
+    console.log(aggregations);
+    const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+    const [price, setPrice] = useState<string | null>(null);
+    const [rating, setRating] = useState<string | null>(null);
+    const [opened, setOpened] = useState<string[]>(aggregations?.map((item) => item.attribute_code) || []);
+    console.log(selectedFilters);
+    console.log(price);
+    console.log(rating);
+
+
+    const isAccordionItemOpen = (attribute_code: string) => opened.includes(attribute_code);
+
+
+
+
+
+    const handleToggle = (attribute_code: string) => (open: boolean) => {
+        if (open) {
+            setOpened((current) => [...current, attribute_code]);
+        } else {
+            setOpened((current) => current.filter((item) => item !== attribute_code));
+        }
+    };
+
+    console.log(opened);
+    const {trigger, data, error, isMutating} = useSWRMutation(
+        (arg: string | string[][] | Record<string, string> | URLSearchParams | undefined) => {
+            const query = new URLSearchParams(arg).toString();
+
+            return `${BASEURL}/api/productsCategory/productsCategories/${query}`;
+        },
+
+
+        fetchHomePage.filterProducts
+    );
+
+    // const handelSelectAttribute =async (e) => {
+    //     // console.log(attribute_code);
+    //     // const x = opened.includes(attribute_code);
+    //     // console.log(x)
+    //     // if(x) {
+    //     //
+    //     //
+    //     //
+    //     //     let selected = aggregations?.filter((item) => item.attribute_code === attribute_code);
+    //     //     console.log(selected);
+    //     //
+    //     // }
+    //
+    //     setValueselected({
+    //         ...valueselected,
+    //         [e.target.name]: e.target.value
+    //     })
+    //
+    //     let index = await trigger({valueselected, uid});
+    //     console.log(index.data.data)
+    //     dispatchEvent(cartProductsFiltred(index?.data.data));
+    //
+    // }
+
+
+
+    const [valueselected, setValueselected] = useState<Record<string, string[]>>({});
+
+
+    const [selectName, setSelectName] = useState<string>('');
+    console.log(selectName);
+    const isFilterSelected = (selectedValue: string) => {
+        if (!selectName || !valueselected[selectName]) return false; // Avoid errors
+
+        Object.keys(valueselected).length > 0 ? Object.keys(valueselected[selectName]).includes(selectedValue) : null;
+
+    };
+    const handelSelectAttribute = async (e) => {
+        const { name, value } = e.target; // Extract name and value from event
+        setSelectName(name);
+
+        // setValueselected((prev) => {
+        //     // If the attribute exists and is an array, update it
+        //     if (Array.isArray(prev[name])) {
+        //         // Toggle selection: If value is already present, remove it; otherwise, add it
+        //         const updatedValues = prev[name].includes(value)
+        //             ? prev[name].filter((v) => v !== value) // Remove if exists
+        //             : [...prev[name], value]; // Add new value
+        //
+        //         return {
+        //             ...prev,
+        //             [name]: updatedValues,
+        //         };
+        //     }
+        //
+        //     // If the attribute is not an array, initialize it as an array
+        //     return {
+        //         ...prev,
+        //         [name]: [value],
+        //     };
+        // });
+        setValueselected((prev) => {
+            if (!prev[name]) {
+                return { ...prev, [name]: [value] }; // Initialize if not present
+            }
+
+            const updatedValues = prev[name].includes(value)
+                ? prev[name].filter((v) => v !== value) // Remove if exists
+                : [...prev[name], value]; // Add new value
+
+            return { ...prev, [name]: updatedValues };
+        });
+
+    };
+    console.log(valueselected);
+
+
+
+
+
+    console.log(data?.data?.data.products.items);
+    // dispatchEvent(cartProductsFiltred(data?.data?.data));
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (Object.keys(valueselected).length > 0) {
+                let index = await trigger({valueselected, uid});
+                console.log(index.data.data);
+                if(index?.data?.data){
+
+                    dispatchEvent(cartProductsFiltred(index?.data?.data?.products?.items));
+                }
+            }
+        };
+        fetchData();
+    }, [valueselected]);
+    let handelShowProducts = async () => {
+        let index = await trigger({valueselected, uid});
+        console.log(index.data.data)
+        // dispatchEvent(cartProductsFiltred(index?.data.data));
+
+    }
+    // useMemo(() => {
+    //     if (data?.data?.data) {
+    //         dispatchEvent(cartProductsFiltred(data?.data.data));
+    //     }
+    // }, [data?.data?.data])
+
+    useEffect(() => {
+        const handleRouteChange = (url: string) => {
+            console.log(url);
+            console.log(url.startsWith("/categorie")); // Check if it's a category route
+
+            if (router.query.uid !== null) {
+                dispatchEvent(cartProductsFiltred([])); // Dispatch the action
+                setValueselected({}); // Reset filters
+                setSelectName(""); // Reset selected name
+            }
+        };
+
+        // Listen to route change
+        router.events.on("routeChangeComplete", handleRouteChange);
+
+        // Cleanup event listener when component unmounts
+        return () => {
+            router.events.off("routeChangeComplete", handleRouteChange);
+        };
+    }, [router]);
+
+
+
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
+    return (
+
+        <form className="mt-4 border-t border-gray-200">
+        <h3 className="sr-only">Categories</h3>
+        <ul role="list" className="px-2 py-3 font-medium text-gray-900">
+            {subCategories.map((category) => (
+                <li key={category.name}>
+                    <a href={category.href} className="block px-2 py-3">
+                        {category.name}
+                    </a>
+                </li>
+            ))}
+        </ul>
+
+        {aggregations?.map((section) => (
+            <Disclosure key={section.attribute_code} as="div" className="border-t border-gray-200 px-4 py-6">
+                <h3 className="-mx-2 -my-3 flow-root">
+                    <DisclosureButton className="group flex w-full items-center justify-between bg-white px-2 py-3 text-gray-400 hover:text-gray-500">
+                        <span className="font-medium text-gray-900">{section.label}</span>
+                        <span className="ml-6 flex items-center">
+                     <PlusIcon aria-hidden="true" className="size-5 group-data-[open]:hidden" />
+                       <MinusIcon aria-hidden="true" className="size-5 group-[&:not([data-open])]:hidden" />
+                        </span>
+                    </DisclosureButton>
+                </h3>
+                <DisclosurePanel className="pt-6">
+                    <div className="space-y-6">
+                        {section.options.map((option, optionIdx) => (
+                            <div key={option.value} className="flex gap-3">
+                                <div className="flex h-5 shrink-0 items-center">
+                                    <div className="group grid size-4 grid-cols-1">
+                                        <input
+                                            defaultValue={Array.isArray(option.value) ? option.value.join(",") : option.value?.toString() ?? ""}
+                                            id={`filter-mobile-${section.label}-${optionIdx}`}
+                                            name={`${section.attribute_code}`}
+                                            type="checkbox"
+                                            checked={isFilterSelected(option.value)}
+
+                                            onChange={async(e: any) => {
+                                                await handelSelectAttribute(e);
+                                            }}
+                                            className="col-start-1 row-start-1 appearance-none rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                                        />
+                                        <svg
+                                            fill="none"
+                                            viewBox="0 0 14 14"
+                                            className="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25"
+                                        >
+                                            <path
+                                                d="M3 8L6 11L11 3.5"
+                                                strokeWidth={2}
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="opacity-0 group-has-[:checked]:opacity-100"
+                                            />
+                                            <path
+                                                d="M3 7H11"
+                                                strokeWidth={2}
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="opacity-0 group-has-[:indeterminate]:opacity-100"
+                                            />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <label
+                                    htmlFor={`filter-mobile-${section.label}-${optionIdx}`}
+                                    className="min-w-0 flex-1 text-gray-500"
+                                >
+                                    {option.label}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
+                </DisclosurePanel>
+            </Disclosure>
+        ))}
+
+
+    </form>
+
+    );
+}
+
+
+
+export default FiltersSideBar;

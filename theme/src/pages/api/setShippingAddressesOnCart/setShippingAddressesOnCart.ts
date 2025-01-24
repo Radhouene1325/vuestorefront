@@ -6,7 +6,7 @@ import { parse } from 'cookie';
 import {
     GetAvailableCustomerPaymentMethodsResponse,
     SetBillingAddressOnCartResponse,
-    SetShippingAddressesOnCartMutation
+    SetShippingAddressesOnCartMutation, SetShippingAddressesOnCartResponse
 } from "@vue-storefront/magento-sdk";
 import {MethodBaseOptions, MethodOptions} from "@vue-storefront/magento-sdk/lib/types";
 import {AxiosRequestConfig} from "axios";
@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 
 
-    const cartId =await getCookie('cart-id', { req, res });
+    const cartId = String(await getCookie('cart-id', { req, res }) || '');
     const token =await getCookie('auth-token', { req, res });
 
     console.log('cartId:', cartId);
@@ -51,7 +51,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log("the is her dvfvfvfd req", lastname,firstname,street,telephone,zipCode);
     const params = {
 
-        cart_id:cartId,
+        cart_id: cartId as string,
 
         shipping_addresses: [
 
@@ -90,7 +90,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 
 
-    const response = await sdk.magento.setShippingAddressesOnCart<SetShippingAddressesOnCartMutation>(
+    const response = await sdk.magento.setShippingAddressesOnCart<SetShippingAddressesOnCartResponse<SetShippingAddressesOnCartMutation>>(
         params,
         {
             customHeaders: {

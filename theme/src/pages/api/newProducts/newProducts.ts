@@ -5,6 +5,11 @@ import {sdk} from "../../../../sdk.config";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 try {
     const response = await sdk.magento.products({
+        filter: {
+            new:{
+                eq:'1'
+            }
+        },
         pageSize: 8,
         currentPage: 1,
     })

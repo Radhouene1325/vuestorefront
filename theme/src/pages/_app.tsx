@@ -1,36 +1,36 @@
-// import "@/styles/globals.css"
+// // import "@/styles/globals.css"
+// //
+// // import type { ReactElement, ReactNode } from 'react'
+// // import type { NextPage } from 'next'
+// // import type { AppProps } from 'next/app'
+// // import Layout from "@/components/layout/layout";
+// // import {ThemeProvider} from "@/context/GlobalContext";
+// // import {wrapper} from "@/store";
+// // import {Provider} from "react-redux";
+// //
+// // export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+// //   getLayout?: (page: ReactElement,pageProps:P) => ReactNode
+// // }
+// //
+// // type AppPropsWithLayout = AppProps & {
+// //   Component: NextPageWithLayout
+// // }
+// //
+// //  function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+// //   // Default layout wrapping
+// //
+// //      const getLayout = Component.getLayout || ((page) =>
+// //          <ThemeProvider> <Layout>{page}</Layout></ThemeProvider>
+// //
+// //      );
+// //
+// //      return getLayout(
+// //              <Component {...pageProps} />,pageProps
+// //      );
+// // }
+// //
+// // export default wrapper.withRedux(MyApp);
 //
-// import type { ReactElement, ReactNode } from 'react'
-// import type { NextPage } from 'next'
-// import type { AppProps } from 'next/app'
-// import Layout from "@/components/layout/layout";
-// import {ThemeProvider} from "@/context/GlobalContext";
-// import {wrapper} from "@/store";
-// import {Provider} from "react-redux";
-//
-// export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
-//   getLayout?: (page: ReactElement,pageProps:P) => ReactNode
-// }
-//
-// type AppPropsWithLayout = AppProps & {
-//   Component: NextPageWithLayout
-// }
-//
-//  function MyApp({ Component, pageProps }: AppPropsWithLayout) {
-//   // Default layout wrapping
-//
-//      const getLayout = Component.getLayout || ((page) =>
-//          <ThemeProvider> <Layout>{page}</Layout></ThemeProvider>
-//
-//      );
-//
-//      return getLayout(
-//              <Component {...pageProps} />,pageProps
-//      );
-// }
-//
-// export default wrapper.withRedux(MyApp);
-
 import "@/styles/globals.css";
 import type { ReactElement, ReactNode } from "react";
 import type { NextPage } from "next";
@@ -99,3 +99,74 @@ console.log(persistor)
 // 4. Export MyApp (no more wrapper.withRedux)
 export default MyApp;
 
+
+
+
+
+// import "@/styles/globals.css";
+// import type { ReactElement, ReactNode } from "react";
+// import type { NextPage } from "next";
+// import type { AppProps } from "next/app";
+// import Layout from "@/components/layout/layout";
+// import { ThemeProvider } from "@/context/GlobalContext";
+// import { Provider } from "react-redux";
+// import { wrapper } from "@/store";
+// import localForage from 'localforage';
+// import { persistStore } from 'redux-persist';
+// import { useEffect, useState } from 'react';
+// import dynamic from "next/dynamic";
+//
+// // Dynamically import PersistGate to prevent SSR issues
+// const PersistGate = dynamic(
+//     () => import('redux-persist/integration/react').then((mod) => mod.PersistGate),
+//     { ssr: false, loading: () => <div>Loading...</div> }
+// );
+//
+// // Type for pages with optional layouts
+// export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+//     getLayout?: (page: ReactElement, pageProps: P) => ReactNode;
+// };
+//
+// type AppPropsWithLayout = AppProps & {
+//     Component: NextPageWithLayout;
+// };
+//
+// function MyApp({ Component, ...rest }: AppPropsWithLayout) {
+//     const { store, props } = wrapper.useWrappedStore(rest);
+//
+//     const [persistor, setPersistor] = useState<any>(null);
+//
+//     useEffect(() => {
+//         // Initialize Redux Persist on the client side
+//         const _persistor = persistStore(store);
+//         (store as any).__persistor = _persistor;
+//         setPersistor(_persistor);
+//     }, [store]);
+//
+//     // Retrieve the layout from the page component or use the default layout
+//     const getLayout =
+//         Component.getLayout ??
+//         ((page) => (
+//             <ThemeProvider>
+//                 <Layout>{page}</Layout>
+//             </ThemeProvider>
+//         ));
+//
+//     return (
+//         <Provider store={store}>
+//             {getLayout(
+//                 persistor ? (
+//                     <PersistGate persistor={persistor}>
+//                         <Component {...props.pageProps} />
+//                     </PersistGate>
+//                 ) : (
+//                     <Component {...props.pageProps} />
+//                 ),
+//                 props.pageProps
+//             )}
+//         </Provider>
+//     );
+// }
+//
+// // ✅ No need for getServerSideProps in _app.tsx
+// export default MyApp;

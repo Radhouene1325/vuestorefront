@@ -8,6 +8,7 @@ import {BASEURL} from "@/BASEURL/URL";
 import {WichList} from "@/utils/addProductsToWichList";
 import {wichListProducts, wichListProductsLength} from "@/store/slices/wichlistSlice";
 import {useDispatch} from "react-redux";
+import {openWichList} from "@/store/slices/counterSlice";
 export default function ProductCard({item}) {
     const dispatch=useDispatch()
     console.log(item)
@@ -57,7 +58,7 @@ export default function ProductCard({item}) {
                 dispatch(wichListProducts(result?.data?.data?.addProductsToWishlist.wishlist.items_v2.items))
             }
             // if(wichListProductsLength(result?.data?.data?.addProductsToWishlist?.wishlist?.items_count)){}
-
+            dispatch(openWichList(true))
 
         }else {
             let data = productsWichList.filter((item) => item.product.sku === sku)
@@ -114,9 +115,9 @@ export default function ProductCard({item}) {
                         <SfCounter size="xs">{123}</SfCounter>
                     </SfLink>
                 </div>
-                <p className="block py-2 font-normal typography-text-sm text-neutral-700">
-                    Lightweight • Non slip • Flexible outsole • Easy to wear on and off
-                </p>
+                {/*<p className="block py-2 font-normal typography-text-sm text-neutral-700">*/}
+                {/*    Lightweight • Non slip • Flexible outsole • Easy to wear on and off*/}
+                {/*</p>*/}
                 <span className="block pb-2 font-bold typography-text-lg">$2345,99</span>
                 <SfButton onClick={(async () => {
                     await Router.push({

@@ -75,7 +75,7 @@ export const integrations = {
             middlewares: [
                 cors({
                     origin: [
-                        "http://localhost:3000",
+                        "http://lp06.corp.itroteam.com:4000",
                         ...(process.env.MIDDLEWARE_ALLOWED_ORIGINS?.split(",") ?? []),
                     ],
                     credentials: true,

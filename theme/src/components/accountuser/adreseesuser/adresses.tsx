@@ -1,5 +1,5 @@
 import ProductCard from "@/components/categories/productsCart/ProductsCart";
-import React, {useMemo} from "react";
+import React, {useMemo, useState} from "react";
 import {
     SfButton,
     SfCounter,
@@ -23,15 +23,15 @@ import authenticationuser from "@/utils/authentication";
 import {deleteAdresseCustomer} from "@/store/slices/counterSlice";
 import {useDispatch} from "react-redux";
 import NewAdreses from "@/components/accountuser/adreseesuser/addnewadreses";
+import {Country} from "@vue-storefront/magento-types";
 
 interface AdressesProps {
-    countries?: any
+    countries?: Country[]
 }
 
-const Adresses = ({countries}) => {
+const Adresses = ({countries}: {countries: Country[]}) => {
     const adressCustomer = useSelector((state: RootState) => state?.counter?.adressescustomer)
-    console.log(adressCustomer)
-    let items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    // console.log(adressCustomer.addresses)
     const [addressid, setAdressid] = React.useState<number>(0)
     const dispatch = useDispatch()
     const {trigger, data, error, isMutating} = useSWRMutation(
@@ -57,7 +57,7 @@ const Adresses = ({countries}) => {
 
     }
 
-    useMemo(async () => {
+    useMemo<void>(async () => {
         console.log(addressid)
         if (data?.data?.data?.deleteCustomerAddress === true) {
             await dispatch(deleteAdresseCustomer(addressid))
@@ -70,6 +70,19 @@ const Adresses = ({countries}) => {
     const handelOpen = () => {
     setOpen(!open)
     }
+const [updateAdress, setUpdateAdress] = React.useState<Record<string, string> & { lastname?: string; useAsShippingAddress?: boolean; aptNo?: string; street?: string; city?: string; zipCode?: string; telephone?: string; country?: string; firstname?: string }>({})
+    const[idAdress,setIdAdress]=React.useState<number>(0)
+    const [isOpen, setIsOpen] = useState(false);
+
+    const openModal = () => setIsOpen(true);
+    const closeModel=()=>setIsOpen(false)
+
+    const handelSelectAdress=async (id:number)=>{
+        console.log(id)
+        setIdAdress(id)
+        const adress = adressCustomer?.addresses?.filter((item: { id: number; }) => item.id === id);
+        setUpdateAdress(adress[0])
+    }
     return (
         <>
 
@@ -79,7 +92,7 @@ const Adresses = ({countries}) => {
                 </SfButton>
 
                 {/* Storefront UI List */}
-                <NewAdreses open={open}  countries={countries}/>
+                <NewAdreses open={open} setOpen={setOpen} updateAdress={updateAdress} countries={countries as Country[]} idAdress={idAdress} openModal={openModal} setIsOpen={setIsOpen} isOpen={isOpen} closeModel={closeModel} close={() => setIsOpen(false)} firstname={updateAdress.firstname || ''} />
                 {!open&&adressCustomer?.addresses?.map((item: { id: React.Key | null | undefined; firstname: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; lastname: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; street: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; region: { region: any; }; country_code: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; telephone: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }) => (
                     <SfListItem
                         key={item.id}
@@ -101,7 +114,7 @@ const Adresses = ({countries}) => {
                                     <strong>Telephone:</strong> {item.telephone}
                                 </p>
                             </div>
-                            <div className="mt-2 sm:mt-0 sm:text-right">
+                            <div className="mt-2 sm:mt-0 sm:text-right gap-2">
                                 <SfButton
                                     size="sm"
                                     variant="secondary"
@@ -111,6 +124,19 @@ const Adresses = ({countries}) => {
                                     }}
                                 >
                                     remove
+                                </SfButton>
+                                <SfButton
+                                    size="sm"
+                                    variant="secondary"
+
+                                    onClick={async () => {
+                                        if (typeof item.id === 'number') {
+                                            await handelSelectAdress(item.id);
+                                            openModal();
+                                        }
+                                    }}
+                                >
+                                    update
                                 </SfButton>
                             </div>
                         </div>

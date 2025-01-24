@@ -48,6 +48,23 @@ const fetchHomePage = {
     },
 
 
+    SpecificationsProducts: async (url_key:{url_key:string})=>{
+        try{
+            const response=await fetch(`${BASEURL}/api/SpecificationsProducts/SpecificationsProducts?url_key=${url_key}`);
+
+            if(!response){
+                throw new Error('Network response was not ok');
+            }
+            const data=await response.json();
+            return data;
+
+        }catch(error){
+            console.error('Error fetching data:', error);
+            throw error; // Rethrow the error for handling in the calling function
+        }
+    },
+
+
     filterProducts:async(url: string, { arg }:{arg:any})=>{
 
         try {
@@ -126,6 +143,35 @@ const fetchHomePage = {
 
     },
 
+    relatedProducts:async(sku:string)=>{
+console.log("sku in fetchHomePage 888888888888888888888888888888",sku)
+        // console.log("urliskeyisher dssssssss",sku)
+        try{
+            const response=await fetch(`${BASEURL}/api/relatedProducts/relatedProducts`,{
+
+                headers:{
+                    'Content-Type':'application/json'
+                },
+
+
+            });
+
+            if(!response) {
+
+                throw new Error('Network response was not ok');
+            }
+            const data=await response.json();
+            console.log("data",data)
+            return data;
+
+        }catch(error){
+            console.error('Error fetching data:', error);
+            throw error; // Rethrow the error for handling in the calling function
+        }
+
+
+
+    },
 
     createEmptyCart:async(token:string)=>{
 
@@ -297,6 +343,26 @@ const fetchHomePage = {
 
 
     setShippingMethodsOnCart:async(url: string, { arg }:{arg:any})=>{
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(arg),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to send data');
+            }
+
+            return response.json(); // parse JSON response
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            throw error; // Rethrow the error for handling in the calling function
+        }
+    },
+    updateCustomerAddress:async(url: string, { arg }:{arg:any})=>{
         try {
             const response = await fetch(url, {
                 method: 'POST',

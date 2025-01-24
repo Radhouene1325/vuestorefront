@@ -153,13 +153,7 @@ query {
 `
 
 
-export {
-    queryProductsAndIdwichList,
-    queryIdRegion,
-    queryOrderHistory,
-    test
 
-}
 
 export const APPLIED_COUPONS_FRAGMENT =`#graphql
 fragment billing_address on CustomerOrder {
@@ -200,23 +194,225 @@ fragment comments on CustomerOrder {
     }
 }
 `
+export const ITEMS =`#graphql
+
+fragment items on CustomerOrder {
+    items {
+        discounts {
+            amount{currency value}
+            applied_to
+            coupon{ code}
+            label
+        }
+        entered_options {
+            label
+            value
+        }
+        gift_message {
+            from
+            message
+            to
+        }
+        id
+        product {
+            activity
+            attribute_set_id
+            canonical_url
+            categories{
+                canonical_url
+                children_count
+                filter_price_range
+                image
+                include_in_menu
+                is_anchor
+                landing_page
+                level
+                meta_description
+                path
+                path_in_store
+                url_key
+                position
+                product_count
+                uid
+                url_key
+                url_path
+                url_suffix
+            }
+            category_gear
+            climate
+            collar
+            color
+            country_of_manufacture
+            created_at
+            
+            custom_attributesV2{
+                errors{message type}
+                items{code}
+            }
+            description{html}
+            eco_collection
+            erin_recommends
+            features_bags
+            format
+            gender
+            gift_message_available
+            id
+            image{url}
+            manufacturer
+            material
+            media_gallery{label position url disabled}
+           
+            meta_description
+            meta_keyword
+            meta_title
+            name
+            new
+            new_from_date
+            new_to_date
+            only_x_left_in_stock
+            options_container
+            pattern
+            performance_fabric
+#            price{
+#                maximalPrice {
+#                    adjustments {
+#                        amount{currency value}
+#                        code{
+#                            TAX
+#                            WEEE
+#                            WEEE_TAX
+#                        }
+#                        description{
+#                            INCLUDED
+#                            EXCLUDED
+#                        }
+#                    }
+#                    amount{currency value}
+#                }
+#                regularPrice {
+#                    adjustments {
+#                        amount{currency value}
+#                        code{
+#                            TAX
+#                            WEEE
+#                            WEEE_TAX
+#                        }
+#                        description{
+#                            INCLUDED
+#                            EXCLUDED
+#                        }
+#                    }
+#                    amount{currency value}
+#                }
+#                minimalPrice {
+#                    adjustments {
+#                        amount{currency value}
+#                        code{
+#                            TAX
+#                            WEEE
+#                            WEEE_TAX
+#                        }
+#                        description{
+#                            INCLUDED
+#                            EXCLUDED
+#                        }
+#                    }
+#                    amount{currency value}
+#                }
+#            }
+            price_range{
+                maximum_price{discount{amount_off percent_off }final_price{currency value} fixed_product_taxes{amount{currency value}label } regular_price{currency value}  }
+                maximum_price{discount{amount_off percent_off }final_price{currency value} fixed_product_taxes{amount{currency value}label } regular_price{currency value} }
+
+            }
+            price_tiers{
+                discount{amount_off percent_off }final_price{currency value} quantity
+            }
+            product_links{link_type linked_product_sku linked_product_type sku position}
+            rating_summary
+           
+            review_count
+           
+            sale
+           
+            size
+            sku
+            sleeve
+           
+            special_from_date
+            special_price
+            special_to_date
+            
+            strap_bags
+            style_bags
+            style_bottom
+            style_general
+            swatch_image
+            thumbnail{url}
+            tier_price
+            tier_prices{customer_group_id qty website_id value percentage_value}
+            type_id
+            uid
+            updated_at
+#            upsell_products
+            url_key
+            url_path
+            url_rewrites{
+                parameters {
+                    name value
+                }
+                url
+            }
+            url_suffix
+            websites{
+                code
+                default_group_id
+                id
+                is_default
+                name
+                sort_order
+            }
+        }
+        product_name
+        product_sale_price {
+            currency
+            value
+        }
+        product_sku
+        product_type
+        product_url_key
+        quantity_canceled
+        quantity_invoiced
+        quantity_ordered
+        quantity_refunded
+        quantity_returned
+        quantity_shipped
+        selected_options {
+            label
+            value
+        }
+        status
+    }
+}
+`
 
 
-const test = `#graphql
-${APPLIED_COUPONS_FRAGMENT}, ${GIFT_MESSAGE} , ${COMMENTS}
+ const customerOrdersQuery = `#graphql
+${APPLIED_COUPONS_FRAGMENT}, ${GIFT_MESSAGE} , ${COMMENTS},${ITEMS}
 query{
-  
+
         customerOrders {
             items {
-              
+
                 carrier
                 email
              ...gift_message
                 ...comments
+                ... items
                 grand_total
                 id
                 increment_id
-                
+
                 payment_methods{
                     name
                     type
@@ -249,11 +445,328 @@ query{
             }
             total_count
         }
-        
-    
+
+
 
 }
 `
+
+
+
+
+const BILLINGdRESS =`#graphql
+fragment billing_address on CustomerOrder {
+    billing_address {
+        city
+        company
+        country_code
+        fax
+        firstname
+        lastname
+        middlename
+        postcode
+        prefix
+        region
+        region_id
+        street
+        suffix
+        telephone
+        vat_id
+    }
+}
+`
+
+
+
+
+
+const SHIPPINGMETHODE = `#graphql
+fragment shipiingmethode on CustomerOrder {
+    shipping_method
+}
+`;
+
+const SHIPMENTS =`#graphql
+
+fragment shipments on CustomerOrder {
+    shipments {
+        comments {
+            message
+            timestamp
+        }
+        id
+        items {
+            id
+            order_item{
+                discounts{amount{currency value} coupon{code} label }
+                entered_options{value label}
+                gift_message{from to message}
+                id
+                product_name
+                product_sale_price{currency value}product_sku quantity_canceled quantity_shipped
+
+
+
+            }
+            product_name
+            product_sale_price{currency value}
+            product_sku
+            quantity_shipped
+        }
+        number
+        tracking {
+            carrier
+            number
+            title
+        }
+    }
+}
+
+
+`
+
+const SHIPPINGdRESS =`#graphql    
+fragment shippingDress on CustomerOrder {
+    shipping_address {
+        city
+        company
+        country_code
+        fax
+        firstname
+        lastname
+        middlename
+        postcode
+        prefix
+        region
+        region_id
+        street
+        suffix
+        telephone
+        vat_id
+    }
+}
+`
+
+
+const queryPayments= `#graphql
+${BILLINGdRESS},${SHIPPINGdRESS},${SHIPPINGMETHODE},${SHIPMENTS}
+mutation placeOrder($input: PlaceOrderInput!) {
+    placeOrder(input:$input) {
+        errors {
+            code
+            message
+        }
+        order {
+            
+            order_id
+            order_number
+        }
+        orderV2 {
+
+         ...billing_address
+            carrier
+
+            created_at
+
+            email
+            gift_message {
+                from
+                message
+                to
+            }
+            grand_total
+            id
+            increment_id
+
+            items {
+                discounts {
+                    amount{currency value}
+                    applied_to
+                    coupon{ code}
+                    label
+                }
+                entered_options {
+                    label
+                    value
+                }
+                gift_message {
+                    from
+                    message
+                    to
+                }
+                id
+                product {
+                    activity
+                    attribute_set_id
+                    canonical_url
+                    categories{
+                        canonical_url
+                        children_count
+                        filter_price_range
+                        image
+                        include_in_menu
+                        is_anchor
+                        landing_page
+                        level
+                        meta_description
+                        path
+                        path_in_store
+                        url_key
+                        position
+                        product_count
+                        uid
+                        url_key
+                        url_path
+                        url_suffix
+                    }
+                    category_gear
+                    climate
+                    collar
+                    color
+                    country_of_manufacture
+                    created_at
+
+                    custom_attributesV2{
+                        errors{message type}
+                        items{code}
+                    }
+                    description{html}
+                    eco_collection
+                    erin_recommends
+                    features_bags
+                    format
+                    gender
+                    gift_message_available
+                    id
+                    image{url}
+                    manufacturer
+                    material
+                    media_gallery{label position url disabled}
+
+                    meta_description
+                    meta_keyword
+                    meta_title
+                    name
+                    new
+                    new_from_date
+                    new_to_date
+                    only_x_left_in_stock
+                    options_container
+                    pattern
+                    performance_fabric
+
+                    price_range{
+                        maximum_price{discount{amount_off percent_off }final_price{currency value} fixed_product_taxes{amount{currency value}label } regular_price{currency value}  }
+                        maximum_price{discount{amount_off percent_off }final_price{currency value} fixed_product_taxes{amount{currency value}label } regular_price{currency value} }
+
+                    }
+                    price_tiers{
+                        discount{amount_off percent_off }final_price{currency value} quantity
+                    }
+                    product_links{link_type linked_product_sku linked_product_type sku position}
+                    rating_summary
+
+                    review_count
+
+                    sale
+
+                    size
+                    sku
+                    sleeve
+
+                    special_from_date
+                    special_price
+                    special_to_date
+
+                    strap_bags
+                    style_bags
+                    style_bottom
+                    style_general
+                    swatch_image
+                    thumbnail{url}
+                    tier_price
+                    tier_prices{customer_group_id qty website_id value percentage_value}
+                    type_id
+                    uid
+                    updated_at
+                    #            upsell_products
+                    url_key
+                    url_path
+                    url_rewrites{
+                        parameters {
+                            name value
+                        }
+                        url
+                    }
+                    url_suffix
+                    websites{
+                        code
+                        default_group_id
+                        id
+                        is_default
+                        name
+                        sort_order
+                    }
+                }
+                product_name
+                product_sale_price {
+                    currency
+                    value
+                }
+                product_sku
+                product_type
+                product_url_key
+                quantity_canceled
+                quantity_invoiced
+                quantity_ordered
+                quantity_refunded
+                quantity_returned
+                quantity_shipped
+                selected_options {
+                    label
+                    value
+                }
+                status
+            }
+            number
+            order_date
+            order_number
+
+            shipping_method
+            status
+            token
+            total{
+                base_grand_total{value currency}
+                discounts{
+                    label
+                    amount{currency value}
+                }
+
+            }
+            ...shippingDress
+            ...shipiingmethode
+            ...shipments
+        }
+    }
+}
+
+
+`
+
+
+
+
+export {
+    queryProductsAndIdwichList,
+    queryIdRegion,
+    queryOrderHistory,
+    customerOrdersQuery,
+    queryPayments,
+
+
+}
+
+
 
 
 
@@ -330,119 +843,9 @@ query{
 //     }
 // }
 //
-// fragment items on CustomerOrder {
-//     items {
-//         discounts {
-//             amount
-//             applied_to
-//             coupon
-//             label
-//         }
-//         entered_options {
-//             label
-//             value
-//         }
-//         gift_message {
-//             from
-//             message
-//             to
-//         }
-//         id
-//         product {
-//             activity
-//             attribute_set_id
-//             canonical_url
-//             categories
-//             category_gear
-//             climate
-//             collar
-//             color
-//             country_of_manufacture
-//             created_at
-//             crosssell_products
-//             custom_attributesV2(filters: {})
-//             description
-//             eco_collection
-//             erin_recommends
-//             features_bags
-//             format
-//             gender
-//             gift_message_available
-//             id
-//             image
-//             manufacturer
-//             material
-//             media_gallery
-//             media_gallery_entries
-//             meta_description
-//             meta_keyword
-//             meta_title
-//             name
-//             new
-//             new_from_date
-//             new_to_date
-//             only_x_left_in_stock
-//             options_container
-//             pattern
-//             performance_fabric
-//             price
-//             price_range
-//             price_tiers
-//             product_links
-//             rating_summary
-//             related_products
-//             review_count
-//             reviews(pageSize: 20, currentPage: 1)
-//             sale
-//             short_description
-//             size
-//             sku
-//             sleeve
-//             small_image
-//             special_from_date
-//             special_price
-//             special_to_date
-//             stock_status
-//             strap_bags
-//             style_bags
-//             style_bottom
-//             style_general
-//             swatch_image
-//             thumbnail
-//             tier_price
-//             tier_prices
-//             type_id
-//             uid
-//             updated_at
-//             upsell_products
-//             url_key
-//             url_path
-//             url_rewrites
-//             url_suffix
-//             websites
-//         }
-//         product_name
-//         product_sale_price {
-//             currency
-//             value
-//         }
-//         product_sku
-//         product_type
-//         product_url_key
-//         quantity_canceled
-//         quantity_invoiced
-//         quantity_ordered
-//         quantity_refunded
-//         quantity_returned
-//         quantity_shipped
-//         selected_options {
-//             label
-//             value
-//         }
-//         status
-//     }
-// }
-//
+
+
+
 //
 
 

@@ -85,13 +85,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { sdk } from '../../../../sdk.config';
 import gql from "graphql-tag";
-import {CountriesResponse, CreateCustomerMutation} from "@vue-storefront/magento-sdk";
+import {
+    CountriesResponse,
+    CreateCustomerMutation,
+    CreateCustomerResponse,
+    GenerateCustomerTokenResponse
+} from "@vue-storefront/magento-sdk";
 import {MethodOptions} from "@vue-storefront/magento-sdk/lib/types";
 import {CustomQuery} from "@vue-storefront/middleware";
 import {Context} from "@vue-storefront/magento-api/server/types/context";
 import {CountryInformationQuery, CustomerCreateInput, CustomHeaders} from "@vue-storefront/magento-types";
 import {ApolloQueryResult} from "@apollo/client/core";
 import {FetchResult} from "@apollo/client";
+import jwt from "jsonwebtoken";
+import {serialize} from "cookie";
 
 
 export declare function createCustomer(
@@ -109,6 +116,7 @@ export interface ICreateCustomer {
 }
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
 const { email, firstname, lastname,password }: ICreateCustomer = req.body;
+console.log("the req", req.body);
     try {
         // Extract necessary fields from the request body
         const customQuery = {
@@ -133,7 +141,65 @@ const { email, firstname, lastname,password }: ICreateCustomer = req.body;
             password,
 
         }
-        const result = await sdk.magento.createCustomer<CreateCustomerMutation>(params)
+        const result = await sdk.magento.createCustomer(params)
+
+
+        console.log("the result",result?.data.createCustomerV2.customer.email);
+
+        if(result?.data.createCustomerV2.customer.email) {
+
+
+            if (!result?.data.createCustomerV2.customer.email || !req.body.password) {
+                return res.status(400).json({message: 'Email and password are required.'});
+            }
+
+
+            const response = await sdk.magento.generateCustomerToken({
+
+                email: result?.data?.createCustomerV2?.customer?.email as string,
+                password: req?.body?.password as string,
+
+            });
+            console.log("the response", response);
+
+            const token = response.data?.generateCustomerToken?.token;
+            const decoded = jwt.decode(token, process.env.JWT_SECRET as string);
+
+            // Serialize the cookie
+            const currentTime = Math.floor(Date.now() / 1000)
+
+
+            const expirationTime = decoded?.exp as number; ///thes expire time for the token
+
+            const expiresIn = expirationTime - currentTime
+
+            if (expiresIn > 0) {
+                console.log(`Token will expire in ${expiresIn} seconds.`);
+            } else {
+                console.log('Token has already expired.');
+            }
+
+            if (!token) {
+                return res.status(500).json({message: 'Token generation failed.'});
+            }
+
+            res.setHeader(
+                'Set-Cookie',
+                serialize('auth-token', token, {
+                    httpOnly: true, // Prevent JavaScript access
+                    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+                    sameSite: "strict", // Protect against CSRF
+                    path: "/", // Make cookie accessible across the site
+                    maxAge: expirationTime, // 1 week
+                })
+            );
+
+
+
+
+
+
+        }
 
 
         res.status(200).json({ data: result });

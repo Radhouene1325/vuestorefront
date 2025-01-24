@@ -5,6 +5,8 @@ import {AppDispatch, RootState, wrapper} from "@/store";
 import {authntication, resetState} from "@/store/slices/userSlice";
 import {getCookie} from "cookies-next";
 import {useDispatch} from "react-redux";
+import authenticationuser from "@/utils/authentication";
+import {BASEURL} from "@/BASEURL/URL";
 
 // export async function getServerSideProps({ req, res }) {
 // const token = await getCookie('auth-token', { req, res })
@@ -15,26 +17,40 @@ import {useDispatch} from "react-redux";
 //         props: {token?token:"",cartId},
 //     }
 // }
-export const getServerSideProps = (async (context) => {
-    const {req,res}=context
-    // Fetch data from external API
-    const token = await getCookie('auth-token', {req, res})
-    const cartId = await getCookie('cart-id', {req, res})
-    console.log('Token:', token);
-    console.log('Cart ID:', cartId);
-    return {
-        props: {token:token?token:'hwllo', cartId:cartId?cartId:'hwllo'},
-    }
-});
+// export const getServerSideProps = (async (context) => {
+//     const {req,res}=context
+//
+//
+//     // console.log('sleeeeemmmeemmmmmmmmmmmmmmmmmm',req)
+//
+//     // Fetch data from external API
+//     const token = await getCookie('auth-token', {req, res})
+//     const cartId = await getCookie('cart-id', {req, res})
+//     console.log('Token:', token);
+//     console.log('Cart ID:', cartId);
+//
+//     console.log('sleeeeemmmeemmmmmmmmmmmmmmmmmm')
+//     // let index = await authenticationuser.authentication(`${BASEURL}/api/authentication/authentication`, { arg: yourArgument });
+//     // console.log('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' ,index)
+//
+//     return {
+//         props: {token:token?token:'hwllo', cartId:cartId?cartId:'hwllo'},
+//     }
+// });
 
 
-export default function Login({token, cartId}) {
 
-    console.log(token,cartId)
+
+
+
+
+export default function Login({cartId}) {
+
+    console.log(cartId)
     const router = useRouter()
     console.log(router.query)
     const dispatch = useDispatch();
-    dispatch(authntication(false));
+    // dispatch(authntication(false));
     // if(!token &&  !cartId) return (
     //     dispatch(resetState())
     // )
@@ -52,42 +68,48 @@ export default function Login({token, cartId}) {
 
     );
 };
+
+
+
+
+
+
 //
-// export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps((store: {
-//     dispatch: AppDispatch,
-//     getState: () => RootState
-// }) =>
-//     async (context: GetServerSidePropsContext) => {
-//         const {req, res} = context;
-//
-//         // console.log(  'sacdsssssssssssssssssssssssssssssssssssssss', data)
-//         let token= await getCookie('auth-token',{req, res})
-//         let cartId= await getCookie('cart-id',{req, res})
-//
-// console.log(  'sacdsssssssssssssssssssssssssssssssssssssss', token)
-//         console.log(  'sacdsssssssssssssssssssssssssssssssssssssss', cartId)
-//         try {
-//
-//
-//
-//
-//
-//         }catch (error){
-//              throw(error)
-//         }
-//
-//         return {
-//             props:
-//                 {
-//                     // item: items,
-//                     products:'hello'
-//                     // quantity:total_quantity?.total_quantity,
-//                 },
-//
-//
-//         };
-//
-//     });
+export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps((store: {
+    dispatch: AppDispatch,
+    getState: () => RootState
+}) =>
+    async (context: GetServerSidePropsContext) => {
+        const {req, res} = context;
+
+        // console.log(  'sacdsssssssssssssssssssssssssssssssssssssss', data)
+        let token= await getCookie('auth-token',{req, res})
+        let cartId= await getCookie('cart-id',{req, res})
+
+console.log(  'sacdsssssssssssssssssssssssssssssssssssssss', token)
+        console.log(  'sacdsssssssssssssssssssssssssssssssssssssss', cartId)
+        try {
+
+
+
+
+
+        }catch (error){
+             throw(error)
+        }
+
+        return {
+            props:
+                {
+                    // item: items,
+                    cartId:cartId
+                    // quantity:total_quantity?.total_quantity,
+                },
+
+
+        };
+
+    });
 
 
 // export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps(

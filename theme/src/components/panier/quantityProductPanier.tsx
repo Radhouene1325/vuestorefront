@@ -8,6 +8,7 @@ import {BASEURL} from "@/BASEURL/URL";
 import {cartProducts} from "@/store/slices/productsSlice";
 import {useDispatch} from "react-redux";
 import {quantityCart} from "@/store/slices/userSlice";
+import {useRouter} from "next/router";
 
 interface QuantitySelectorProps {
     product?: {
@@ -33,7 +34,9 @@ interface QuantitySelectorProps {
     }
 }
 
-export default function QuantitySelector({product, setDeleteItem, deleteItem, item}: QuantitySelectorProps) {+
+export default function QuantitySelector({product, setDeleteItem, deleteItem, item}: QuantitySelectorProps) {
+
+    const router=useRouter()
     console.log(item)
     const inputId = useId();
     const min = item?.quantity ?? 1;
@@ -64,9 +67,10 @@ console.log(value)
         // console.log(x)
         // console.log(x?.data?.data?.removeItemFromCart?.cart)
         if(x?.data?.data?.removeItemFromCart?.cart) {
-console.log('data?.data?.data?.removeItemFromCart?.cart')
+            console.log('data?.data?.data?.removeItemFromCart?.cart');
             dispatch(cartProducts(x?.data?.data?.removeItemFromCart?.cart));
             dispatch(quantityCart(x?.data?.data?.removeItemFromCart?.cart.total_quantity));
+            router.replace(router.asPath)
         }
 
     };
@@ -85,6 +89,7 @@ console.log('data?.data?.data?.removeItemFromCart?.cart')
 
             dispatch(cartProducts(data2?.data?.data?.updateCartItems?.cart));
             dispatch(quantityCart(data2?.data?.data?.updateCartItems?.cart.total_quantity))
+            router.replace(router.asPath)
         }
     }, [data2]);
 
@@ -218,3 +223,4 @@ console.log('data?.data?.data?.removeItemFromCart?.cart')
 
     );
 }
+

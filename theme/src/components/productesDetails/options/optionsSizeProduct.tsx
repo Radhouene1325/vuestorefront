@@ -12,9 +12,23 @@ type DataType = {
 };
 
 
-export default function SizeFilter({selectedSizes,setSelectedSizes,opened,setOpened,params,setParams,
-
-                                       configurable_options}) {
+export default function SizeFilter({
+    selectedSizes,
+    setSelectedSizes,
+    opened,
+    setOpened,
+    params,
+    setParams,
+    configurable_options,
+}: {
+    selectedSizes: string[];
+    setSelectedSizes: (sizes: string[]) => void;
+    opened: boolean;
+    setOpened: (opened: boolean) => void;
+    params: any[]; // Replace 'any[]' with the actual type if known
+    setParams: (params: any[]) => void; // Replace 'any[]' with the actual type if known
+    configurable_options: DataType[];
+}) {
 
 
     // console.log(configurable_options)

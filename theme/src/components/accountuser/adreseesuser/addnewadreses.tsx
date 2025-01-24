@@ -306,8 +306,9 @@ import React, {
     useId,
     FormEventHandler,
     ChangeEvent,
-    FocusEvent, useEffect,
+    FocusEvent, useEffect, Dispatch, SetStateAction,
 } from 'react';
+// @ts-ignore
 import {
     SfModal,
     SfButton,
@@ -321,11 +322,11 @@ import {
     SfRadio,
     SfLoaderCircular,
 } from '@storefront-ui/react';
-import useSWRMutation, { TriggerWithoutArgs } from 'swr/mutation';
-import { BASEURL } from '@/BASEURL/URL';
+import useSWRMutation, {TriggerWithoutArgs} from 'swr/mutation';
+import {BASEURL} from '@/BASEURL/URL';
 import authenticationuser from '@/utils/authentication';
 import fetchHomePage from '@/utils/fetchHomePage';
-import {pushAdresseCustomer} from "@/store/slices/counterSlice";
+import {pushAdresseCustomer, updateAdresseCustomer} from "@/store/slices/counterSlice";
 import {useDispatch} from "react-redux";
 
 // Define interfaces for props and data structures
@@ -340,13 +341,20 @@ interface Region {
 }
 
 interface NewAddressesProps {
-
-    open: boolean;
-
-    countries: Country[];
+    open: boolean,
+    idAdress: number,
+    openModal: () => void,
+    setIsOpen: Dispatch<SetStateAction<boolean>>,
+    isOpen: boolean,
+    closeModel: () => void,
+    countries: Country[],
+    updateAdress: Record<string, string[0]> & { lastname?: string , useAsShippingAddress?: boolean, aptNo?: string, street?: string, city?: string, zipCode?: string, telephone?: string, country?: string, firstname?: string },
+    close: () => void;
+    firstname: string;
 }
 
 interface FormJSON {
+    useAsbillingAddress: boolean;
     firstname: string;
     lastname: string;
     telephone: string;
@@ -359,15 +367,24 @@ interface FormJSON {
 }
 
 export default function NewAddresses({
-
+                                         idAdress,
                                          open,
-
                                          countries,
+                                         updateAdress,
+                                         openModal,
+                                         setIsOpen,
+                                         isOpen,
+                                         closeModel,
+                                         setOpen
+
                                      }: NewAddressesProps) {
+    console.log(updateAdress)
+
+
     const [rating, setRating] = useState(0);
     const modalTitleId = useId();
     const modalDescId = useId();
-const dispatch = useDispatch()
+    const dispatch = useDispatch()
     // SWR Mutation for creating customer address
     const {
         trigger: createCustomerAddress,
@@ -416,25 +433,30 @@ const dispatch = useDispatch()
         const form = e.target as HTMLFormElement;
         const formData = new FormData(form);
         const formJSON = Object.fromEntries(formData.entries()) as unknown as FormJSON;
-console.log(formJSON)
+        console.log(formJSON)
         console.log(regionsData)
+        formJSON.useAsbillingAddress = formData.has("useAsbillingAddress");
+        formJSON.useAsShippingAddress = formData.has("useAsShippingAddress");
+
+
         // Validate region
         const infoRegion = regionsData?.data?.available_regions.filter(
-            (region: Region) => region.id === JSON.parse( formJSON.city)
+            (region: Region) => region.id === JSON.parse(formJSON.city)
         );
-console.log(infoRegion)
+        console.log(infoRegion)
         if (!infoRegion) {
             setFormErrors(
                 'Please select a valid region or ensure the country has available regions.'
             );
             return;
         }
-
+console.log(formJSON, infoRegion);
         try {
-            await createCustomerAddress({ formJSON, infoRegion });
+            await createCustomerAddress({formJSON, infoRegion});
             // Optionally, close the modal or reset the form upon success
             close();
             form.reset();
+            setOpen(false)
         } catch (err) {
             console.error('Error sending data:', err);
             setFormErrors('An error occurred while processing your request.');
@@ -442,19 +464,85 @@ console.log(infoRegion)
     };
     // console.log(createAddressData.data.data.createCustomerAddress)
 
-    useEffect(()=>{
-        if(createAddressData?.data?.data?.createCustomerAddress)
-        dispatch(pushAdresseCustomer(createAddressData?.data?.data?.createCustomerAddress))
-    },[createAddressData])
+    useEffect(() => {
+        if (createAddressData?.data?.data?.createCustomerAddress)
+            dispatch(pushAdresseCustomer(createAddressData?.data?.data?.createCustomerAddress))
+    }, [createAddressData])
+    // const [formErrors, setFormErrors] = useState("");
+
+    // Toggle modal visibility
+    const closeModal = () => setIsOpen(false);
+
+
+    let updateCustomerAddress: TriggerWithoutArgs<any, any, string, any>, adressData: any,
+        isFetchingDataUpdatedError: boolean, adressDataError: any;
+    ({
+        trigger: updateCustomerAddress,
+        data: adressData,
+        isMutating: isFetchingDataUpdatedError,
+        error: adressDataError,
+    } = useSWRMutation(
+        `${BASEURL}/api/updateCustomerAddress/updateCustomerAddress`,
+        fetchHomePage.regionId
+    ));
+
+    const onSubmited: FormEventHandler<HTMLFormElement> = async (e) => {
+        e.preventDefault();
+        setFormErrors(null);
+
+        const form = e.target as HTMLFormElement;
+        const formData = new FormData(form);
+        const formJSON = Object.fromEntries(formData.entries()) as unknown as FormJSON;
+        console.log(formJSON)
+        console.log(regionsData)
+        // Validate region
+        formJSON.useAsbillingAddress = formData.has("useAsbillingAddress");
+        formJSON.useAsShippingAddress = formData.has("useAsShippingAddress");
+        const infoRegion = regionsData?.data?.available_regions.filter(
+            (region: Region) => region.id === JSON.parse(formJSON.city)
+        );
+        console.log(infoRegion)
+        if (!infoRegion) {
+            setFormErrors(
+                'Please select a valid region or ensure the country has available regions.'
+            );
+            return;
+        }
+        console.log(formJSON, infoRegion);
+        try {
+            await updateCustomerAddress({formJSON, infoRegion, idAdress});
+            // Optionally, close the modal or reset the form upon success
+            // setIsOpen(false);
+            form.reset();
+
+        } catch (err) {
+            console.error('Error sending data:', err);
+            setFormErrors('An error occurred while processing your request.');
+        }
+    };
+
+
+
+    console.log(adressData?.data?.errors)
+    console.log(adressData?.data?.data.updateCustomerAddress)
+    // updateCustomerAddress
+    useEffect(() => {
+        if (adressData?.data?.data?.updateCustomerAddress)
+            dispatch(updateAdresseCustomer(adressData?.data?.data?.updateCustomerAddress))
+           if(!adressData?.data?.errors) {
+
+               setIsOpen(false)
+           }
+    }, [adressData])
 
     return (
         <>
 
-            {open&&<div className="flex justify-center py-10 bg-neutral-100 min-h-screen"
+            {open && <div className="flex justify-center py-10 bg-neutral-100 min-h-screen"
 
                 // className="min-w-[376px] md:w-[480px]"
-                  is="section"
-                  role="alertdialog"
+                          is="section"
+                          role="alertdialog"
             >
                 {/* Form Container */}
                 <div className="w-full max-w-3xl bg-white shadow-md rounded-lg p-8">
@@ -665,9 +753,15 @@ console.log(infoRegion)
 
                         {/* Use as Shipping Address */}
                         <div className="flex items-center gap-2 col-span-full mt-2">
+                            <SfCheckbox type='checkbox' id="useAsbillingAddress" name="useAsbillingAddress"/>
+                            <label htmlFor="useAsbillingAddress" className="typography-text-sm">
+                                Use as default_billing
+                            </label>
+                        </div>
+                        <div className="flex items-center gap-2 col-span-full mt-2">
                             <SfCheckbox id="useAsShippingAddress" name="useAsShippingAddress"/>
                             <label htmlFor="useAsShippingAddress" className="typography-text-sm">
-                                Use as shipping address
+                                Use as default_shipping
                             </label>
                         </div>
 
@@ -679,7 +773,7 @@ console.log(infoRegion)
                             <SfButton type="submit" disabled={isCreatingCustomerAddress}>
                                 {isCreatingCustomerAddress ? (
                                     <>
-                                        <SfLoaderCircular size="small" className="mr-2"/>
+                                        <SfLoaderCircular size="sm" className="mr-2"/>
                                         Saving...
                                     </>
                                 ) : (
@@ -692,7 +786,198 @@ console.log(infoRegion)
             </div>
 
             }
+
+            <>
+                {/* Button to Open Modal */}
+                {/*<SfButton onClick={openModal}>Update Billing Address</SfButton>*/}
+
+                {/* Modal Popup */}
+                <SfModal
+                    open={isOpen}
+                    onClose={closeModal}
+                    aria-labelledby="modalTitle"
+                    className="max-w-3xl mx-auto"
+                >
+                    <div className="p-6">
+
+
+                        {
+                            adressData?.data?.errors && (
+
+
+                                <div
+                                    role="alert"
+                                    className="flex items-start md:items-center max-w-[600px] shadow-md bg-negative-100 pr-2 pl-4 ring-1 ring-negative-300 typography-text-sm md:typography-text-base py-1 rounded-md"
+                                >
+                                    <p className="py-2 mr-2"> {adressData?.data?.errors.map((error: {
+                                        message: string
+                                    }) => error.message)} </p>
+                                </div>)
+
+
+                        }
+
+
+                        <h2 id="modalTitle" className="text-2xl font-bold mb-2">
+                            Update Your Billing Address
+                        </h2>
+                        <p className="text-sm text-neutral-600 mb-4">
+                            Please provide your billing details below.
+                        </p>
+
+                        {/* Display form errors */}
+                        {formErrors && (
+                            <div className="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded" role="alert">
+                                {formErrors}
+                            </div>
+                        )}
+
+                        {/* Billing Form */}
+                        <form
+                            onSubmit={onSubmited}
+                            className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6 text-neutral-900"
+                            noValidate
+                        >
+                            {/* First Name */}
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="firstname" className="typography-text-sm font-medium">
+                                    First Name
+                                </label>
+                                <SfInput id="firstname" name="firstname" defaultValue={updateAdress?.firstname}
+                                         autoComplete="given-name" required/>
+                            </div>
+
+                            {/* Last Name */}
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="lastname" className="typography-text-sm font-medium">
+                                    Last Name
+                                </label>
+                                <SfInput id="lastname" name="lastname" defaultValue={updateAdress?.lastname || ''}
+                                         autoComplete="family-name" required/>
+                            </div>
+
+                            {/* Phone */}
+                            <div className="flex flex-col gap-1 col-span-full">
+                                <label htmlFor="telephone" className="typography-text-sm font-medium">
+                                    Phone
+                                </label>
+                                <SfInput id="telephone" name="telephone" defaultValue={updateAdress?.telephone || ''}
+                                         type="tel" autoComplete="tel" required/>
+                            </div>
+
+                            {/* Country */}
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="country" className="typography-text-sm font-medium">
+                                    Country
+                                </label>
+                                <SfSelect
+                                    id="country"
+                                    name="country"
+                                    placeholder="-- Select --"
+                                    autoComplete="country-name"
+                                    required
+                                    onChange={handleSelect}
+                                    className="border border-neutral-300 rounded-md px-3 py-2
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                  focus:border-transparent text-neutral-900 placeholder-neutral-400"
+                                >
+                                    <option value="" disabled>
+                                        -- Select Country --
+                                    </option>
+                                    {countries.map((country) => (
+                                        <option key={country.id} value={country.id}>
+                                            {country.full_name_english}
+                                        </option>
+                                    ))}
+                                </SfSelect>
+                            </div>
+
+
+                            {/* City */}
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="city" className="typography-text-sm font-medium">
+                                    City
+                                </label>
+                                <SfSelect
+                                    id="city"
+                                    name="city"
+                                    placeholder={isFetchingRegions ? 'Loading regions...' : '-- Select City --'}
+                                    autoComplete="address-level2"
+                                    required
+                                    disabled={!regionsData?.data?.available_regions || isFetchingRegions}
+                                    className="border border-neutral-300 rounded-md px-3 py-2
+                  focus:outline-none focus:ring-2 focus:ring-blue-500
+                  focus:border-transparent text-neutral-900 placeholder-neutral-400"
+                                >
+                                    <option value="" disabled>
+                                        -- Select City --
+                                    </option>
+                                    {regionsData?.data?.available_regions?.map((region: Region) => (
+                                        <option key={region.id} value={region.id}>
+                                            {region.name}
+                                        </option>
+                                    ))}
+                                </SfSelect>
+                                {isFetchingRegions && (
+                                    <div className="flex items-center mt-2">
+                                        <SfLoaderCircular size="small"/>
+                                        <span className="ml-2 text-sm text-neutral-600">Loading regions...</span>
+                                    </div>
+                                )}
+                                {regionsError && (
+                                    <span className="text-sm text-red-600">
+                  Failed to load regions. Please try again.
+                </span>
+                                )}
+                            </div>
+
+
+                            {/* Street */}
+                            <div className="flex flex-col gap-1 col-span-full">
+                                <label htmlFor="street" className="typography-text-sm font-medium">
+                                    Street
+                                </label>
+                                <SfInput id="street" name="street" defaultValue={updateAdress?.street}
+                                         autoComplete="address-line1" required/>
+                            </div>
+
+                            {/* ZIP Code */}
+                            <div className="flex flex-col gap-1">
+                                <label htmlFor="zipCode" className="typography-text-sm font-medium">
+                                    ZIP Code
+                                </label>
+                                <SfInput id="zipCode" name="zipCode" defaultValue={updateAdress?.postcode}
+                                         placeholder="e.g., 12345" required/>
+                            </div>
+
+                            {/* Use as Shipping Address */}
+                            <div className="flex items-center gap-2 col-span-full mt-2">
+                                <SfCheckbox id="useAsShippingAddress" name="useAsShippingAddress"/>
+                                <label htmlFor="useAsShippingAddress" className="typography-text-sm">
+                                    use as default_billing
+                                </label>
+                            </div>
+                            <div className="flex items-center gap-2 col-span-full mt-2">
+                                <SfCheckbox id="useAsShippingAddress" name="useAsShippingAddress"/>
+                                <label htmlFor="useAsShippingAddress" className="typography-text-sm">
+                                    use as default_shipping
+                                </label>
+                            </div>
+
+                            {/* Submit and Reset Buttons */}
+                            <div className="flex gap-4 col-span-full justify-end mt-4">
+                                <SfButton type="reset" variant="secondary">
+                                    Clear All
+                                </SfButton>
+                                <SfButton type="submit">Save Address</SfButton>
+                                <SfButton type="submit" onClick={(() => closeModel())}>close</SfButton>
+                            </div>
+                        </form>
+                    </div>
+                </SfModal>
+            </>
+
         </>
 
     );
-}
+};

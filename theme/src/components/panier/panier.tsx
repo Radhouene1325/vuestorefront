@@ -117,8 +117,9 @@ export default function Pannier({item, ...rest}: PannierProps) {
     const {
         product,
         quantity,
+        configured_variant
     } = item;
-
+console.log(item)
     // Local state for review form
     const [rating, setRating] = useState<number>(0);
     const [review, setReview] = useState('');
@@ -156,8 +157,8 @@ console.log(deleteItem)
             >
                 {/* Product Image */}
                 <img
-                    src={product.thumbnail.url}
-                    alt={product.name}
+                    src={configured_variant?.thumbnail?.url}
+                    alt={configured_variant?.name}
                     width={100}
                     height={100}
                     className="mx-auto border border-neutral-200 rounded-md aspect-square w-[100px] md:w-[176px]"
@@ -167,7 +168,7 @@ console.log(deleteItem)
                 <div className="flex flex-col justify-between">
                     {/* Product name */}
                     <p className="text-neutral-900 md:typography-text-lg font-medium">
-                        {product.name}
+                        {configured_variant?.name}
                     </p>
 
                     {/* Quantity */}
@@ -181,7 +182,7 @@ console.log(deleteItem)
                     <p className="text-neutral-900 mt-2">
                         Price:
                         <span className="font-semibold ml-1">
-              {product.price_range.maximum_price.final_price.value} EUR
+              {product?.price_range?.maximum_price?.final_price?.value} EUR
             </span>
                     </p>
                 </div>

@@ -18,6 +18,7 @@ import {GetServerSideProps, GetServerSidePropsContext} from "next";
 import {authntication, quantityCart, usernamecustomer} from "@/store/slices/userSlice";
 import {setHeaderCategories} from "@/store/slices/categorieSlice";
 import {sdk} from "../../sdk.config";
+import mysql from 'mysql2/promise';
 
 import {
     queryIdRegion,
@@ -28,9 +29,18 @@ import {wichListProducts, wichListProductsLength} from '@/store/slices/wichlistS
 import {getCookie} from "cookies-next";
 import jwt from "jsonwebtoken";
 import {destroyCookie} from "nookies";
+import {productSpecificate} from "@/store/slices/productsSlice";
+import {CustomHeaders, RequestPasswordResetEmailMutationVariables} from "@vue-storefront/magento-types";
+import {RequestPasswordResetEmailMutation} from "@vue-storefront/magento-sdk";
+import {FetchResult} from "@apollo/client";
+import {Context} from "@vue-storefront/magento-api/server/types/context";
 
 
-
+export declare function requestPasswordResetEmail(
+    context: Context,
+    input: RequestPasswordResetEmailMutationVariables,
+    customHeaders?: CustomHeaders
+): Promise<FetchResult<RequestPasswordResetEmailMutation>>;
 
 
 const Page: NextPageWithLayout = () => {
@@ -44,15 +54,17 @@ const Page: NextPageWithLayout = () => {
 
 Page.getLayout = function getLayout(page: ReactElement, pageProps: any) {
 
-    const { products} = pageProps
+    const {products, items, categories} = pageProps;
+    console.log(categories)
+    console.log(items)
 
-
+// console.log(products)
 
     return (
 
         <ThemeProvider
             // items={item}
-            products={products}>
+            products={products} items={undefined}>
             <Layout>
                 {page}
             </Layout>
@@ -79,20 +91,32 @@ export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps
     // console.log("Cart ID from Cookie:", cookies['auth-token']);
     const cartId = cookiess['cart-id'] as string;
     let token = cookiess['auth-token'] as string;
-    /////thes if fonctionne correctly
-    // if (token) {
-    //     // Set Set-Cookie header to remove it
-    //     cookies.push(
-    //         serialize('auth-token', '', {
-    //             httpOnly: true, // Prevent JavaScript access
-    //             secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    //             path: "/", // Make cookie accessible across the site
-    //             maxAge:0
-    //         })
-    //     );
-    //
-    // }
+    console.log('token99999999999999999999999999999999999999999999999999999999999999999999999999999999999999', token)
 
+    // if(token===undefined){
+    //     await store.dispatch(authntication(false));
+    // }
+    /////thes if fonctionne correctly
+    if (token) {
+        const decoded = jwt.decode(token, process.env.JWT_SECRET as string) as { exp: number };
+        const currentTime = Math    .floor(Date.now() / 1000);
+        let  expiresIn=decoded.exp-currentTime;
+        if (expiresIn<3 ||decoded===null && token !== undefined) {
+            cookies.push(
+                serialize('auth-token', '', {
+                    httpOnly: true, // Prevent JavaScript access
+                    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                    path: "/", // Make cookie accessible across the site
+                    maxAge: 0
+                })
+            );
+            store.dispatch(authntication(false));
+        }
+        // Set Set-Cookie header to remove it
+
+
+    }
+    const categories = await sdk.magento.categories({});
 
 
     const {data: {data: {categories: items}}, error, loading} = await fetchHomePage.HomePage(token as string)
@@ -104,10 +128,10 @@ export const getServerSideProps: GetServerSideProps = wrapper.getServerSideProps
     const {data: {data: products}} = await fetchHomePage.NewProducts()
     if (cartId === undefined || token || cartId !== undefined && token === undefined) {
 
-console.log('111111111  premier partie de la condition',cartId);
-        if(cartId!==undefined && token===undefined){
+        console.log('111111111  premier partie de la condition', cartId);
+        if (cartId !== undefined && token === undefined) {
             // const {data: {data: {createEmptyCart: createEmptyCart}}} = await fetchHomePage.createEmptyCart(token);
-
+            await store.dispatch(authntication(false));
             const {data: {data: {cart: total_quantity}}} = await fetchHomePage.cartTotalQty(cartId, token);  //the create empty cart is the id of the cart
             // console.log("", total_quantity)
 
@@ -124,8 +148,8 @@ console.log('111111111  premier partie de la condition',cartId);
             // );
         }
 
-        if  (cartId === undefined && token === undefined) {
-
+        if (cartId === undefined && token === undefined) {
+            await store.dispatch(authntication(false));
 
             const {data: {data: {createEmptyCart: createEmptyCart}}} = await fetchHomePage.createEmptyCart(token);
 
@@ -145,8 +169,7 @@ console.log('111111111  premier partie de la condition',cartId);
             );
 
 
-        } else if (token!==undefined) {
-
+        } else if (token !== undefined) {
 
 
             const customer = await sdk.magento.customer({
@@ -154,7 +177,9 @@ console.log('111111111  premier partie de la condition',cartId);
                     Authorization: `Bearer ${token || ''}`,
                 }
             });
-            const isAuth = await sdk.magento.requestPasswordResetEmail({email: customer.data.customer.email}, {});
+            console.log('customer999999999999999999999999999999999993333333333333333333333333333333333333333333333333333333333333333333333339999999999999999999999999999999999999999999999', customer)
+            // const isAuth = await sdk.magento.requestPasswordResetEmail({email: customer?.data?.customer?.email}, {});
+            // console.log('isAuth .....................................................................................', isAuth)
 
             store.dispatch(usernamecustomer(customer?.data?.customer?.firstname));
 
@@ -162,12 +187,14 @@ console.log('111111111  premier partie de la condition',cartId);
 
             console.log('createEmptyCart', createEmptyCart);
             console.log('cartId', cartId);
+            if(customer?.data?.customer?.email) {
 
-            await store.dispatch(authntication(isAuth.data.requestPasswordResetEmail));
+
+                await store.dispatch(authntication(true));
+            }
 
 
             if (cartId === undefined) {
-
 
 
                 const {data: {data: {cart: total_quantity}}} = await fetchHomePage.cartTotalQty(createEmptyCart, token);  //the create empty cart is the id of the cart
@@ -236,8 +263,6 @@ console.log('111111111  premier partie de la condition',cartId);
         }
 
 
-
-
         if (token) {
             await sdk.magento.wishlistItemsCount({
                 customHeaders: {
@@ -284,17 +309,16 @@ console.log('111111111  premier partie de la condition',cartId);
     }
 
 
-
-    const customQueryResult = await sdk.magento.customQuery({query:test}, {
-
-        customHeaders: {
-            Authorization: `Bearer ${token || ''}`,
-
-        },
-
-
-    });
-    console.log('CCCCCCCCCCCCCCCCCCCCCSSSSScccccccSSSSSSSSSSSSSSSSSSSSSSSSSSCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', customQueryResult?.data?.customerOrders?.items)
+    // const customQueryResult = await sdk.magento.customQuery({query:test}, {
+    //
+    //     customHeaders: {
+    //         Authorization: `Bearer ${token || ''}`,
+    //
+    //     },
+    //
+    //
+    // });
+    // console.log('CCCCCCCCCCCCCCCCCCCCCSSSSScccccccSSSSSSSSSSSSSSSSSSSSSSCCCCCCCSSSSCCfffffffffffffffffffffffffffCCCCCCCCCCCCCdcasdccccccaCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC', customQueryResult?.data?.customerOrders)
 
     // console.log('her is the cusimer adress is oky ', result);
     // const customQuery = {
@@ -393,12 +417,104 @@ console.log('111111111  premier partie de la condition',cartId);
     //     },});
 // console.log('Wishlist Response:', response.data.customer.wishlists);
 
+    // const upsellProducts = await sdk.magento.upsellProducts({
+    //
+    //     pageSize: 20,
+    //
+    //     currentPage: 1,
+    //
+    //     filter: {
+    //
+    //         sku: {
+    //
+    //             eq: 'MP07'
+    //
+    //         }
+    //
+    //     }
+    //
+    // });
+    // console.log('resultsssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss is her oky', upsellProducts.data.products.items[0].upsell_products);
+
+    console.log('res',products.products.items );
+    const getRandomSku = () => {
+        if (!products?.products?.items || products?.products?.items?.length === 0) return null;
+        const randomIndex = Math.floor(Math.random() * products?.products?.items?.length);
+        return products.products.items[randomIndex]?.url_key;
+    };
+    console.log('xxxxxxxxxxxxxxxxqqwwwwwwwwwwwqqqqqqqqqqxxxxxxxxxxxxxxxxxxxxxx', getRandomSku())
+        let upsell=await fetchHomePage.SpecificationsProducts(getRandomSku())
+    store.dispatch(productSpecificate(upsell))
+    // if(token===undefined){
+    //     await store.dispatch(authntication(false));
+    // }
+    // const result = await sdk.magento.requestPasswordResetEmail<requestPasswordResetEmail> ({ email: '123@gmail.com'},
+    //
+    //     );
+    //
+    // console.log('result is sssssssdeewedwedwedwedeeewdwedwedessssssssssssssssssssssssssssssher oky', result.data.requestPasswordResetEmail)
+
+    // const data= await sdk.magento.resetPassword({
+    //
+    //     email: 'khalfaradhouene@gmail.com',
+    //
+    //     newPassword: 'newPassword',
+    //
+    //     resetPasswordToken: result.data.requestPasswordResetEmail // token obtained from email {@link @vue-storefront/magento-sdk#requestPasswordResetEmail}
+    //
+    // });
+    // console.log('result is ssssssssssss x dsdcdscddddcsddcsasssdwedefrreregrgergerwdewewfwecerwfewfwe   wefewfewssssssssssssssssssssssher oky', data)
+    //
+    // const email = "123@gmail.com";
+    // let resetRequests=[]
+    // try {
+    //     // Create a MySQL connection
+    //     const connection = await mysql.createConnection({
+    //         host: 'magento.test', // Update with your database host
+    //         user: 'magento', // Update with your database username
+    //         password: 'magento', // Update with your database password
+    //         database: 'magento' // Update with your Magento database name
+    //     });
+    //
+    //     // Query to fetch the reset password token
+    //     const [rows] = await connection.execute(
+    //         `SELECT email, rp_token, rp_token_created_at
+    //          FROM customer_entity
+    //          WHERE email = ?`,
+    //         [email]
+    //     );
+    //     console.log('result is qwsqwsqwwqws x dsdcdscddddcsddcsasssdwedefrreregrgergerwdewewfwecerwfewfwe   wefewfewssssssssssssssssssssssher oky', rows[0].rp_token )
+    //     resetRequests = rows;
+    //
+    //         // console.log('result is ssswqwwqwqwqwqwqwqwqsssssssss x dsdcdscddddcsddcsasssdwedefrreregrgergerwdewewfwecerwfewfwe   wefewfewssssssssssssssssssssssher oky', resetRequests)
+    //     // If a token exists, store it
+    //     const data= await sdk.magento.resetPassword( {
+    //
+    //         email: '123@gmail.com',
+    //
+    //         newPassword: 'Pippo123456@@',
+    //
+    //         resetPasswordToken:rows[0]?.rp_token // token obtained from email {@link @vue-storefront/magento-sdk#requestPasswordResetEmail}
+    //
+    //     });
+    //     console.log('result is ssssssssssss ddewx dsdcdscddddcsddcsasssd21e12e12e2212e12e12e12e1e2ee', data)
+    //
+    //
+    //     // Close the connection
+    //     // await connection.end();
+    // } catch (error) {
+    //     console.error("Database error:", error);
+    // }
+
+    console.log('waaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
 
     return {
         props:
             {
                 // item: items,
                 products: products.products,
+                items,
+                categories
                 // quantity:total_quantity?.total_quantity,
             },
 

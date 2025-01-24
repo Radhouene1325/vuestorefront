@@ -5,15 +5,13 @@ import {
     SfIconFavorite,
     SfIconChevronLeft,
     SfIconChevronRight,
-    SfScrollable,
+    SfScrollable, SfRating,
 } from '@storefront-ui/react';
 import classNames from 'classnames';
 import {useRouter} from "next/router";
 
 
-
-
-function ButtonPrev({ disabled, ...attributes }: { disabled?: boolean }) {
+function ButtonPrev({disabled, ...attributes}: { disabled?: boolean }) {
     return (
         <SfButton
             className={classNames('absolute !rounded-full z-10 left-4 bg-white hidden md:block', {
@@ -24,14 +22,14 @@ function ButtonPrev({ disabled, ...attributes }: { disabled?: boolean }) {
             square
             {...attributes}
         >
-            <SfIconChevronLeft />
+            <SfIconChevronLeft/>
         </SfButton>
     );
 }
 
-ButtonPrev.defaultProps = { disabled: false };
+ButtonPrev.defaultProps = {disabled: false};
 
-function ButtonNext({ disabled, ...attributes }: { disabled?: boolean }) {
+function ButtonNext({disabled, ...attributes}: { disabled?: boolean }) {
     return (
         <SfButton
             className={classNames('absolute !rounded-full z-10 right-4 bg-white hidden md:block', {
@@ -42,23 +40,27 @@ function ButtonNext({ disabled, ...attributes }: { disabled?: boolean }) {
             square
             {...attributes}
         >
-            <SfIconChevronRight />
+            <SfIconChevronRight/>
         </SfButton>
     );
 }
 
-ButtonNext.defaultProps = { disabled: false };
+ButtonNext.defaultProps = {disabled: false};
+
 interface ProductesrelitedProps {
-    items?: { items: { variants: { product: any; }[] }[] }
+    // items?: { items: { variants: { product: any; }[] }[] },
+    products?: any
 }
 
 
 // Slider settings
 
-export default function Productesrelited({items}: ProductesrelitedProps) {
-    const route=useRouter()
-
+export default function Productesrelited({products}: ProductesrelitedProps) {
+    const route = useRouter()
+console.log(products.items)
     console.log(route.query.slug)
+
+    const Router = useRouter()
 
     return (
 
@@ -74,62 +76,54 @@ export default function Productesrelited({items}: ProductesrelitedProps) {
             slotNextButton={<ButtonNext/>}
         >
 
-            {items?.items?.map(({variants}) =>
+            {products?.items?.map((item) =>
 
 
+                    (
+                        item?.related_products?.map((itm) => (
+                            <div
+                                key={itm?.uid}
+                                className="first:ms-auto last:me-auto ring-1 ring-inset ring-neutral-200 shrink-0 rounded-md hover:shadow-lg w-[148px] lg:w-[192px]"
+                            >
+                                {/*<a*/}
+                                {/*    className="absolute inset-0 z-1 focus-visible:outline focus-visible:outline-offset focus-visible:rounded-md"*/}
+                                {/*    href="#"*/}
+                                {/*    aria-label={product.name}*/}
+                                {/*/>*/}
 
-                    <>
-                        {
-                            variants?.map(({product}) => (
-                                <div
-                                     key={product.uid}
-                                    className="first:ms-auto last:me-auto ring-1 ring-inset ring-neutral-200 shrink-0 rounded-md hover:shadow-lg w-[148px] lg:w-[192px]"
-                                >
-                                    {/*<a*/}
-                                    {/*    className="absolute inset-0 z-1 focus-visible:outline focus-visible:outline-offset focus-visible:rounded-md"*/}
-                                    {/*    href="#"*/}
-                                    {/*    aria-label={product.name}*/}
-                                    {/*/>*/}
-
-                                    <div className="relative">
-                                        <SfLink href="#" className="block">
-                                            <img src={product.media_gallery.map((url: string) => url.url)}
-                                                 className="block object-cover h-auto rounded-md aspect-square lg:w-[190px] lg:h-[190px]"/>
-                                        </SfLink>
-                                    </div>
-
-                                    <div className="flex flex-col items-start p-4 grow">
-                                        <p className="font-medium typography-text-base">Price:{product.price_range.minimum_price.final_price.value}EURO</p>
-                                        {/*<p className="mt-1 mb-4 font-normal typography-text-sm text-neutral-700">SASAASASAASA</p>*/}
-                                        <SfButton size="sm" variant="tertiary" className="relative mt-auto"
-                                        onClick={(async ()=>{
-                                            let data = variants.filter(e => e.product.uid === product.uid);
-                                            console.log(data)
-                                            let infovarient = data[0]?.attributes
-
-
-                                                const object: { object: { colorCode: number; sizeCode: number } } = {
-                                                    object: {
-                                                        colorCode: infovarient[0]?.value_index,
-                                                        sizeCode: infovarient[1]?.value_index
-                                                    }
-                                                }
-                                            console.log(object);
-                                            await route.push({
-                                                pathname: `/about/${route.query.slug}/${product.sku}`,
-                                                query: {sku: JSON.stringify(object)},
-
-                                            });
-                                        })}
-                                        >
-                                            {product.name}
-                                        </SfButton>
-                                    </div>
+                                <div className="relative">
+                                    <SfLink href="#" className="block">
+                                        <img src={itm?.thumbnail?.url}
+                                             alt={itm?.thumbnail?.label}
+                                             className="block object-cover h-auto rounded-md aspect-square lg:w-[190px] lg:h-[190px]"/>
+                                    </SfLink>
                                 </div>
 
-                            ))
-                        }
-                    </>
+                                <div className="flex flex-col items-start p-4 grow">
+                                    <p className="font-medium typography-text-base">Price:{itm.price_range.minimum_price.final_price.value}$-{itm.price_range.maximum_price.final_price.value}$</p>
+                                    <p className="mt-1 mb-4 font-normal typography-text-sm text-neutral-700">Sattus:{itm.stock_status}</p>
+                                    <span className="flex items-center pr-2 text-xs text-neutral-500">
+              <SfRating value={itm?.review_count
+                  } max={5} size="xs" className="mr-2"/>2 days ago
+            </span>
+                                    <SfButton size="sm" variant="tertiary" className="relative mt-auto"
+
+                                              onClick={(async () => {
+                                                  await Router.push({
+                                                      pathname: `/about/${itm.url_rewrites.map((item: { url: string; }) => item.url).join('/')}`,
+                                                      query: {sku: itm.sku}
+
+                                                  });
+                                              })}
+                                    >
+                                        {itm.name}
+                                    </SfButton>
+                                </div>
+
+                            </div>
+
+                        ))
+                    )
             )
 
             }
@@ -137,6 +131,7 @@ export default function Productesrelited({items}: ProductesrelitedProps) {
 
 
     );
+
 
 
 };

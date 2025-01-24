@@ -2,6 +2,7 @@ import {NextApiRequest, NextApiResponse} from 'next'
 
 import {getCookie} from "cookies-next";
 import {sdk} from "../../../../sdk.config";
+import {queryPayments} from "../../../../customQueryMagento/queryProductsWichList";
 
 
 const stripe=require('stripe')(process.env.STRIPE_SECRET_KEY)
@@ -41,6 +42,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
     });
     console.log(data)
+
+    // const mutationVariables = {
+    //     input: {
+    //         cart_id: cartId,
+    //     }
+    //
+    // };
+    // const neWpayment=await sdk.magento.customMutation({
+    //     queryPayments,
+    //     mutationVariables
+    //
+    // },
+    //     {
+    //         customHeaders: {
+    //             Authorization: `Bearer ${token}`
+    //         }
+    //     })
+    //
+    //
+    // console.log("the payment", neWpayment);
+
+
+
+
     const result = await sdk.magento.placeOrder({cart_id: cartId}, {
         customHeaders: {
             Authorization: `Bearer ${token}`

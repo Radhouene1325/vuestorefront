@@ -1,15 +1,78 @@
-import { Fragment } from 'react';
-import { SfButton, SfIconChevronLeft, SfIconChevronRight, usePagination } from '@storefront-ui/react';
+import {Fragment, useEffect, useMemo} from 'react';
+import {SfButton, SfIconChevronLeft, SfIconChevronRight, usePagination} from '@storefront-ui/react';
 import classNames from 'classnames';
+import useSWRMutation from "swr/mutation";
+import {BASEURL} from "@/BASEURL/URL";
+import fetchHomePage from "@/utils/fetchHomePage";
+import {useRouter} from "next/router";
+import {cartProductsFiltred, paginationProducts} from "@/store/slices/productsSlice";
+import {useDispatch} from "react-redux";
+interface PaginationProps {
+    page_info?: {
+        current_page: number,
+        page_size: number,
+        total_pages: number,
 
-export function Pagination() {
-    const { totalPages, pages, selectedPage, startPage, endPage, next, prev, setPage, maxVisiblePages } = usePagination({
-        totalItems: 150,
-        currentPage: 2,
-        pageSize: 10,
-        maxPages: 1,
+    },
+    total_count?: number
+}
+
+export function Pagination({page_info, total_count}: PaginationProps) {
+    console.log(page_info,total_count)
+    const {totalPages, pages, selectedPage, startPage, endPage, next, prev, setPage, maxVisiblePages} = usePagination({
+        totalItems: total_count || 0,
+        currentPage: page_info?.current_page || 1,
+        pageSize: page_info?.page_size || 1,
+        maxPages: page_info?.total_pages || 1,
     });
+    console.log(pages, selectedPage, totalPages, startPage, endPage, next, prev)
+    const router = useRouter();
+    const {uid} = router.query;
+    const dispatchEvent=useDispatch();
+    const {trigger, data, error, isMutating} = useSWRMutation(
+        (arg: string | string[][] | Record<string, string> | URLSearchParams | undefined) => {
+            const query = new URLSearchParams(arg).toString();
 
+            return `${BASEURL}/api/productsCategory/productsCategories/${query}`;
+        },
+
+
+        fetchHomePage.filterProducts
+    );
+
+     useMemo(async () => {
+         dispatchEvent(cartProductsFiltred([])); // Dispatch the action
+         await trigger({selectedPage,uid})
+     }, [selectedPage])
+
+    useEffect((() => {
+if(data?.data?.data?.products) {
+    dispatchEvent(paginationProducts(data));
+
+}
+    }), [data?.data?.data?.products,dispatchEvent]);
+    useEffect(() => {
+        const handleRouteChange = (url: string) => {
+            console.log(url);
+            console.log(url.startsWith("/categorie")); // Check if it's a category route
+
+            if (router.query.uid !== null) {
+                dispatchEvent(paginationProducts([])); // Dispatch the action
+                // setValueselected({}); // Reset filters
+                // setSelectName(""); // Reset selected name
+            }
+        };
+
+        // Listen to route change
+        router.events.on("routeChangeComplete", handleRouteChange);
+
+        // Cleanup event listener when component unmounts
+        return () => {
+            router.events.off("routeChangeComplete", handleRouteChange);
+        };
+    }, [router]);
+
+    // console.log(data.data.data.products)
     return (
         <nav
             className="flex justify-between items-end border-t border-neutral-200"
@@ -22,7 +85,7 @@ export function Pagination() {
                 aria-label="Go to previous page"
                 disabled={selectedPage <= 1}
                 variant="tertiary"
-                slotPrefix={<SfIconChevronLeft />}
+                slotPrefix={<SfIconChevronLeft/>}
                 onClick={() => prev()}
             >
                 <span className="hidden sm:inline-flex">Previous</span>
@@ -86,7 +149,7 @@ export function Pagination() {
                                     type="button"
                                     className={classNames(
                                         'min-w-[38px] px-3 sm:px-4 py-3 text-neutral-500 md:w-12 rounded-md hover:bg-primary-100 hover:text-primary-800 active:bg-primary-200 active:text-primary-900',
-                                        { '!text-neutral-900 hover:!text-primary-800 active:!text-primary-900': selectedPage === page },
+                                        {'!text-neutral-900 hover:!text-primary-800 active:!text-primary-900': selectedPage === page},
                                     )}
                                     aria-label={`Page ${page} of ${totalPages}`}
                                     aria-current={selectedPage === page}
@@ -150,7 +213,7 @@ export function Pagination() {
                 aria-label="Go to next page"
                 disabled={selectedPage >= totalPages}
                 variant="tertiary"
-                slotSuffix={<SfIconChevronRight />}
+                slotSuffix={<SfIconChevronRight/>}
                 className="gap-3 !px-3 sm:px-6"
                 onClick={() => next()}
             >

@@ -244,23 +244,23 @@ export default function Sidebar({isOpen, onClose}: SidebarProps) {
             </div>
 
             {/* Sort Section */}
-            <div className="p-4 border-b border-neutral-200">
-                <h5 className="pb-2 mb-2 typography-headline-6 font-bold text-neutral-900 uppercase tracking-widest">
-                    Sort by
-                </h5>
-                <SfSelect aria-label="Sorting">
-                    {sortOptions.map((option) => (
-                        <option value={option.value} key={option.value}>
-                            {option.label}
-                        </option>
-                    ))}
-                </SfSelect>
-            </div>
+            {/*<div className="p-4 border-b border-neutral-200">*/}
+            {/*    <h5 className="pb-2 mb-2 typography-headline-6 font-bold text-neutral-900 uppercase tracking-widest">*/}
+            {/*        Sort by*/}
+            {/*    </h5>*/}
+            {/*    <SfSelect aria-label="Sorting">*/}
+            {/*        {sortOptions.map((option) => (*/}
+            {/*            <option value={option.value} key={option.value}>*/}
+            {/*                {option.label}*/}
+            {/*            </option>*/}
+            {/*        ))}*/}
+            {/*    </SfSelect>*/}
+            {/*</div>*/}
 
             {/* PERSONAL DETAILS */}
             <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">
                 <p className="mb-0 font-medium typography-headline-5">Personal Details</p>
-                <SfIconChevronLeft className="text-neutral-500"/>
+                {/*<SfIconChevronLeft className="text-neutral-500"/>*/}
             </div>
             <hr/>
             <ul className="px-4 pb-4 text-sm">
@@ -289,20 +289,20 @@ export default function Sidebar({isOpen, onClose}: SidebarProps) {
             {/* ORDER DETAILS */}
             <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">
                 <p className="mb-0 font-medium typography-headline-5">Order Details</p>
-                <SfIconChevronLeft className="text-neutral-500"/>
+                {/*<SfIconChevronLeft className="text-neutral-500"/>*/}
             </div>
             <hr className="my-2"/>
             <ul className="px-4 pb-4 text-sm">
                 <li className="mb-2">
-                    <Link href="/user/dashboarduser/orders" className="block p-2 rounded-md hover:bg-green-50">
+                    <Link href="/user/OrderHistories/orders" className="block p-2 rounded-md hover:bg-green-50">
                         Order History
                     </Link>
                 </li>
-                <li className="mb-2">
-                    <Link href="/user/dashboarduser/reviews" className="block p-2 rounded-md hover:bg-green-50">
-                        My Reviews
-                    </Link>
-                </li>
+                {/*<li className="mb-2">*/}
+                {/*    <Link href="/user/dashboarduser/reviews" className="block p-2 rounded-md hover:bg-green-50">*/}
+                {/*        My Reviews*/}
+                {/*    </Link>*/}
+                {/*</li>*/}
                 <li>
                     <button
                         onClick={loggout}
@@ -314,26 +314,26 @@ export default function Sidebar({isOpen, onClose}: SidebarProps) {
             </ul>
 
             {/* Extra Section (optional) */}
-            <Fragment>
-                <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">
-                    <p className="mb-0 font-medium typography-headline-5">Extra Section</p>
-                    <SfIconChevronLeft className="text-neutral-500"/>
-                </div>
-            </Fragment>
+            {/*<Fragment>*/}
+            {/*    <div className="flex justify-between p-4 hover:bg-green-50 cursor-pointer">*/}
+            {/*        <p className="mb-0 font-medium typography-headline-5">Extra Section</p>*/}
+            {/*        /!*<SfIconChevronLeft className="text-neutral-500"/>*!/*/}
+            {/*    </div>*/}
+            {/*</Fragment>*/}
 
             {/* Bottom buttons */}
-            <div className="p-4 flex justify-between">
-                <SfButton
-                    variant="secondary"
-                    className="w-full mr-3 hover:bg-green-50"
-                    onClick={handleClearFilters}
-                >
-                    Clear
-                </SfButton>
-                <SfButton className="w-full hover:bg-green-600 hover:text-white">
-                    Save
-                </SfButton>
-            </div>
+            {/*<div className="p-4 flex justify-between">*/}
+            {/*    <SfButton*/}
+            {/*        variant="secondary"*/}
+            {/*        className="w-full mr-3 hover:bg-green-50"*/}
+            {/*        onClick={handleClearFilters}*/}
+            {/*    >*/}
+            {/*        Clear*/}
+            {/*    </SfButton>*/}
+            {/*    <SfButton className="w-full hover:bg-green-600 hover:text-white">*/}
+            {/*        Save*/}
+            {/*    </SfButton>*/}
+            {/*</div>*/}
         </aside>
     );
 };

@@ -17,6 +17,7 @@ import {
 } from "@/store/slices/wichlistSlice";
 import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "@/store";
+import {openWichList} from "@/store/slices/counterSlice";
 
 export default function ProductSliderBasic() {
         const {...products}=useTheme()
@@ -71,7 +72,7 @@ console.log(productsWichList)
         WichList.removeProductsToWichList
     );
 
-    let HandelSubmit = async (sku:{sku:string}) => {
+    let HandelSubmit = async (sku: string) => {
         console.log(sku)
         // let result = await trigger({quanatity: 1 as number, sku: sku});
         // console.log(result?.data?.data?.addProductsToWishlist)
@@ -89,7 +90,7 @@ console.log(productsWichList)
                 dispatch(wichListProducts(result?.data?.data?.addProductsToWishlist.wishlist.items_v2.items))
             }
             // if(wichListProductsLength(result?.data?.data?.addProductsToWishlist?.wishlist?.items_count)){}
-
+            dispatch(openWichList(true))
 
         }else {
             let data = productsWichList.filter((item) => item.product.sku === sku)
@@ -107,15 +108,22 @@ console.log(productsWichList)
         }
 
     }
-
+    const authenticated=useSelector((state:RootState)=>state.user.auth)
+    console.log(authenticated)
     const route = useRouter()
     return (
-        <div className="container mx-auto px-4 py-6 m-a-auto">
-            <h2 className="text-2xl font-bold mb-5">Our Products</h2>
+
+        <div className="bg-gray-100">
+            <div className="mx-auto max-w-12xl px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-2xl py-16 sm:py-24 lg:max-w-none lg:py-32">
+                    <h2 className="text-2xl font-bold text-gray-900">Collections</h2>
+
+
+                    <div className="container mx-auto px-4 py-6 m-a-auto">
 
             {/* Flex container with wrap and gap */}
             <div className="flex flex-wrap gap-5 justify-center">
-                {items.map(({uid, name, price_range, thumbnail, url_key, url_rewrite, sku}) => {
+                {items.map(({uid, name, price_range, thumbnail, url_key, url_rewrite, sku}: { uid: string; name: string; price_range: { maximum_price: { final_price: { value: number } } }; thumbnail: { url: string; label?: string }; url_key: string; url_rewrite?: string; sku: string }) => {
                     return (
                         <div
 
@@ -143,9 +151,9 @@ console.log(productsWichList)
                                     className="absolute bottom-0 right-0 mr-2 mb-2  ring-1 ring-inset ring-neutral-200 !rounded-full"
                                     aria-label="Add to wishlist"
                                 >
-                                    <SfIconFavorite size="sm" onClick={async () => {
+                                    {authenticated === true ? <SfIconFavorite size="sm" onClick={async () => {
                                         await HandelSubmit(sku)
-                                    }}/>
+                                    }}/> : null}
                                     {/*{*/}
                                     {/*      productsWichList?.map(e=>{return e.product.sku==sku})*/}
                                     {/*}*/}
@@ -153,13 +161,13 @@ console.log(productsWichList)
                             </div>
 
                             {/* Content Section */}
-                            <div className="p-4 border-t border-neutral-200 flex-1 flex flex-col" onClick={() => {
-                                route.push({
-                                    pathname: `/about/${url_key}`,
-                                    query: {sku: sku}
-                                })
-                            }}>
-                                <SfLink variant="secondary" className="no-underline">
+                            <div className="p-4 border-t border-neutral-200 flex-1 flex flex-col" >
+                                <SfLink style={{cursor:'pointer'}} variant="secondary" className="no-underline" onClick={async() => {
+                                   await  route.push({
+                                        pathname: `/about/${url_key}`,
+                                        query: {sku: sku}
+                                    })
+                                }}>
                                     {name || "Athletic men's walking sneakers"}
                                 </SfLink>
                                 <div className="flex items-center pt-1">
@@ -188,59 +196,9 @@ console.log(productsWichList)
             </div>
         </div>
 
-        // <main>
-        //
-        //     {
-        //         items.map(({ uid, name, price_range, thumbnail,url_key,url_rewrite,sku})=>{
-        //             return (
-        //                 <div className="  border border-neutral-200 rounded-md hover:shadow-lg max-w-[300px]">
-        //
-        //
-        //                     <div className="relative">
-        //                         <SfLink href="#" className="block">
-        //                             <img
-        //                                 src="https://storage.googleapis.com/sfui_docs_artifacts_bucket_public/production/sneakers.png"
-        //                                 alt="Great product"
-        //                                 className="object-cover h-auto rounded-md aspect-square"
-        //                                 width="300"
-        //                                 height="300"
-        //                             />
-        //                         </SfLink>
-        //                         <SfButton
-        //                             variant="tertiary"
-        //                             size="sm"
-        //                             square
-        //                             className="absolute bottom-0 right-0 mr-2 mb-2 bg-white ring-1 ring-inset ring-neutral-200 !rounded-full"
-        //                             aria-label="Add to wishlist"
-        //                         >
-        //                             <SfIconFavorite size="sm"/>
-        //                         </SfButton>
-        //                     </div>
-        //                     <div className="p-4 border-t border-neutral-200">
-        //                         <SfLink href="#" variant="secondary" className="no-underline">
-        //                             Athletic mens walking sneakers
-        //                         </SfLink>
-        //                         <div className="flex items-center pt-1">
-        //                             <SfRating size="xs" value={5} max={5}/>
-        //
-        //                             <SfLink href="#" variant="secondary" className="pl-1 no-underline">
-        //                                 <SfCounter size="xs">{123}</SfCounter>
-        //                             </SfLink>
-        //                         </div>
-        //                         <p className="block py-2 font-normal typography-text-sm text-neutral-700">
-        //                             Lightweight • Non slip • Flexible outsole • Easy to wear on and off
-        //                         </p>
-        //                         <span className="block pb-2 font-bold typography-text-lg">$2345,99</span>
-        //
-        //                     </div>
-        //                 </div>
-        //             )
-        //         })
-        //
-        //
-        //     }
-        //
-        // </main>
+                </div>
+            </div>
+        </div>
 
 
     );

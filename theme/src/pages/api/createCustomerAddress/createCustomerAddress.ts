@@ -30,7 +30,10 @@ const {  firstname,
     street,
     aptNo,
     state,
-    zipCode
+    zipCode,
+    useAsbillingAddress,
+    useAsShippingAddress
+
 } = req.body.formJSON;
 console.log("the is her dvfvfvfd req", country);
 
@@ -43,15 +46,16 @@ let {formattedCode}=req.body;
 
         country_code: country,
 
-        default_billing: false,
+        default_billing: useAsbillingAddress,
 
-        default_shipping: false,
+        default_shipping: useAsShippingAddress,
 
         firstname: firstname,
 
         lastname: lastname,
 
         postcode: zipCode,
+
 
         street: street,
 

@@ -10,7 +10,7 @@ import {adressescustomer} from "@/store/slices/counterSlice";
 import {useDispatch} from "react-redux";
 import fetchHomePage from "@/utils/fetchHomePage";
 import {useStore} from "react-redux";
-const Customer = ({addresses,data}) => {
+const Customer = ({addresses, data}: {addresses: any, data: any}) => {
 const dispatch=useDispatch()
     console.log('the addresses', addresses)
     dispatch(adressescustomer(addresses))
@@ -70,7 +70,7 @@ const dispatch=useDispatch()
 
 
 
-export const getServerSideProps = async (context) => {
+export const getServerSideProps = async (context: { req: any; res: any; }) => {
     let {req, res} = context;
     let token =await getCookie('auth-token', {req, res})
     const {data: {customer: addresses}} = await sdk.magento.getCustomerAddresses({

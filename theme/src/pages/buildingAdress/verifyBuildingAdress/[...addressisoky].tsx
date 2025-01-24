@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React, {ChangeEvent, useMemo, useState} from 'react'
 import {useRouter} from 'next/router'
 import {GetServerSideProps} from "next";
 import fetchHomePage from "@/utils/fetchHomePage";
@@ -15,10 +15,13 @@ import ChekoutElement from "@/components/chekout/ChekoutElement";
 import {stripePyament} from "@/utils/stripe";
 import productsChekout from "@/components/chekout/productsChekout/productsChekout";
 import ProductsChekout from '@/components/chekout/productsChekout/productsChekout';
-import {SfButton} from "@storefront-ui/react";
+import {SfButton, SfListItem, SfLoaderCircular, SfRadio} from "@storefront-ui/react";
 import Link from "next/link";
 import {getCookie} from "cookies-next";
 import authenticationuser from "@/utils/authentication";
+import useSWRMutation from "swr/mutation";
+import {BASEURL} from "@/BASEURL/URL";
+import {sdk} from "../../../../sdk.config";
 const stripePromise = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 const Addressisoky = ({paymentMethod,customerCart}) => {
     // console.log(stripe)
@@ -66,12 +69,12 @@ console.log(customerCart.data.
                                 <div className="bg-neutral-100 p-4 sm:p-10 ">
                                     <div className="flex justify-between items-center">
 
-                                    <p className="typography-headline-4 sm:typography-headline-3 font-bold">
-                                        Adresse de livraison
-                                    </p>
-                                    <Link href={{
-                                        pathname:'/buildingAdress/buildingAdress'
-                                    }}>Modifier</Link>
+                                        <p className="typography-headline-4 sm:typography-headline-3 font-bold">
+                                            Adresse de livraison
+                                        </p>
+                                        <Link href={{
+                                            pathname: '/buildingAdress/buildingAdress'
+                                        }}>Modifier</Link>
                                     </div>
                                     <p className="typography-headline-4 sm:typography-headline-3 font-bold">
                                         {customerCart.data.customerCart.billing_address?.firstname},{customerCart.data.customerCart?.billing_address.lastname}
@@ -101,7 +104,7 @@ console.log(customerCart.data.
                             </div>
                         </div>
 
-
+                        <Shipppingmethode shippingMethode={[]}/>
                         <div className="flex-shrink-0 w-full md:w-[400px] position-absolute top-0 right-0">
                             <Chekout
                                 available_payment_methods={paymentMethod.data.data.customerCart.available_payment_methods}
@@ -149,18 +152,98 @@ export default Addressisoky
  *
  * @return {Promise<object>} A promise resolving to an object containing the `props` key, which includes the fetched billing address data.
  */
+
+const Shipppingmethode=({shippingMethode}: { shippingMethode: { amount: number; carrier_code: string; method_title: string; price_excl_tax: { currency: string; value: number } }[] })=>{
+    const [checkedState, setCheckedState] = useState('');
+    console.log(checkedState)
+    const {trigger: getShippingMethode, data: shippingData, error: ErrorShippingMethode,isMutating:mutating} = useSWRMutation(
+        `${BASEURL}/api/setShippingMethodsOnCart/setShippingMethodsOnCart`,
+        fetchHomePage.setShippingMethodsOnCart
+    )
+console.log(shippingMethode)
+
+    const handelSelectMethodeShipping = async(event: ChangeEvent<HTMLSelectElement>)=>{
+        console.log(event.target.value)
+        setCheckedState(event.target.value);
+
+        let res=shippingMethode.filter((e: { carrier_code: string; })=>e.carrier_code==event.target.value)
+        if (res) {
+            await getShippingMethode(res[0]);
+        }
+
+    }
+
+    return(
+        <div className="col-span-full">
+
+            {shippingMethode?.map(
+                ({
+                     amount,
+                     carrier_code,
+                     method_title,
+                     price_excl_tax,
+                 }) => (
+                    <SfListItem
+                        as="label"
+                        key={carrier_code}
+                        slotPrefix={
+                            <SfRadio
+                                name="delivery-options"
+                                value={carrier_code}
+                                checked={checkedState === carrier_code}
+                                onChange={(event: ChangeEvent<HTMLInputElement>) => handelSelectMethodeShipping(event as unknown as ChangeEvent<HTMLSelectElement>)}
+                            />
+                        }
+                        slotSuffix={
+                            <span className="text-gray-900">
+                                           <span>{price_excl_tax.currency}</span>
+                                {price_excl_tax.value}{' '}
+
+                                EURO
+                                               </span>
+                        }
+                        className="!items-start max-w-sm border rounded-md border-neutral-200 first-of-type:mr-4 first-of-type:mb-4"
+                    >
+                        {method_title}
+                    </SfListItem>
+                )
+            )}
+            {mutating && <div className="flex gap-4 flex-wrap">
+                <SfLoaderCircular className="!text-cyan-700" size="2xl"/>
+
+            </div>}
+        </div>
+    )
+
+}
+
+
+
+
+
+
 export const getServerSideProps: GetServerSideProps = async (context: any) => {
     console.log("ddssdvdfvfdvdfvaevfv", context.req.headers)
-    const {req} = context
-    const cookies = parse(req.headers.cookie || "");
-    console.log("Cart ID from Cookie:", cookies['auth-token']);
-    const cartId = cookies['cart-id'] as string;
-    const token = cookies['auth-token'] as string;
+    const {req, res} = context;
+
+    let cartId=await getCookie('cart-id',{req, res})
+
+    let token =await  getCookie('auth-token',{req, res})
+
+
 
     // let customerToken = await getCookie('auth-token', {req, res});
     // console.log('hello tokensdclksdcjdnsc', customerToken)
 
     const {data: customerCart} = await authenticationuser.customerCart(token as string)
+
+
+    const result = await sdk.magento.getAvailableCustomerShippingMethods({
+        customHeaders: {
+            Authorization: `Bearer ${token || ''}`,
+        }
+    },{cart_id: cartId});
+
 
 
 
@@ -171,7 +254,9 @@ export const getServerSideProps: GetServerSideProps = async (context: any) => {
         props: {
 
             paymentMethod:paymentMethod,
-            customerCart
+            customerCart,
+            shippingMethode: result?.data?.customerCart?.shipping_addresses?.[0]?.available_shipping_methods || [],
+
             // stripe:stripe,
         }
     };
